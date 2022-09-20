@@ -1,0 +1,572 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cd775338e416aae46984aa3186145426, type: 3}
+  m_Name: GraphEditorData
+  m_EditorClassIdentifier: 
+  nodeData:
+  - rect:
+      serializedVersion: 2
+      x: 392.75
+      y: 352
+      width: 150
+      height: 50
+    title: StoryRoot
+    octaves: 1
+    scale: 3
+    noiseHeight: 0
+    persistence: 0.76017344
+    lacunarity: 2.2255635
+    meshHeightMultiplier: 1.1041725
+    meshHeightCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0.036555417
+        value: 0.7531962
+        inSlope: -0.121984184
+        outSlope: -0.14667124
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 0.34865507
+        value: 0.21354209
+        inSlope: -0.44765508
+        outSlope: -0.3373059
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 0.7262625
+        value: 0.10774342
+        inSlope: 0.38600278
+        outSlope: -0.47922015
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 0.74563825
+        value: 0.5064693
+        inSlope: -0.40854776
+        outSlope: -0.2814337
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    heightRemap:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0.036555417
+        value: 0.7531962
+        inSlope: -0.121984184
+        outSlope: -0.14667124
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 0.34865507
+        value: 0.21354209
+        inSlope: -0.44765508
+        outSlope: -0.3373059
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 0.7262625
+        value: 0.10774342
+        inSlope: 0.38600278
+        outSlope: -0.47922015
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 0.74563825
+        value: 0.5064693
+        inSlope: -0.40854776
+        outSlope: -0.2814337
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    generationRange:
+      min: 0
+      max: 13
+  - rect:
+      serializedVersion: 2
+      x: 304.75
+      y: 442
+      width: 150
+      height: 50
+    title: City
+    octaves: 1
+    scale: 5
+    noiseHeight: 0
+    persistence: 0.28150707
+    lacunarity: 1
+    meshHeightMultiplier: 1.3525739
+    meshHeightCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0.045174323
+        value: 0.7018818
+        inSlope: 0.04997462
+        outSlope: -0.059152663
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 0.47371373
+        value: 0.9595163
+        inSlope: 0.40397263
+        outSlope: 0.41764116
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 0.6427219
+        value: 0.5558815
+        inSlope: 0.20974146
+        outSlope: -0.1769889
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 0.7068414
+        value: 0.5839591
+        inSlope: 0.27175617
+        outSlope: 0.4129702
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    heightRemap:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0.045174323
+        value: 0.7018818
+        inSlope: 0.04997462
+        outSlope: -0.059152663
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 0.47371373
+        value: 0.9595163
+        inSlope: 0.40397263
+        outSlope: 0.41764116
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 0.6427219
+        value: 0.5558815
+        inSlope: 0.20974146
+        outSlope: -0.1769889
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 0.7068414
+        value: 0.5839591
+        inSlope: 0.27175617
+        outSlope: 0.4129702
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    generationRange:
+      min: 0
+      max: 9
+  - rect:
+      serializedVersion: 2
+      x: 504.75
+      y: 442
+      width: 150
+      height: 50
+    title: Cyberpunk
+    octaves: 1
+    scale: 8
+    noiseHeight: 0
+    persistence: 0.3775323
+    lacunarity: 5.9130306
+    meshHeightMultiplier: 1.190086
+    meshHeightCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 1
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 34
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 1
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 34
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    heightRemap:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0
+        inSlope: 2
+        outSlope: 2
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 1
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    generationRange:
+      min: 0
+      max: 6
+  - rect:
+      serializedVersion: 2
+      x: 104.75
+      y: 532
+      width: 150
+      height: 50
+    title: Tree_0
+    octaves: 1
+    scale: 9
+    noiseHeight: 0
+    persistence: 0.45076412
+    lacunarity: 9.480382
+    meshHeightMultiplier: 1.2052077
+    meshHeightCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0.16446936
+        value: 0.91942793
+        inSlope: 0.064907014
+        outSlope: 0.05419451
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 0.5267584
+        value: 0.16579138
+        inSlope: 0.2180029
+        outSlope: 0.23249935
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    heightRemap:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0.16446936
+        value: 0.91942793
+        inSlope: 0.064907014
+        outSlope: 0.05419451
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 0.5267584
+        value: 0.16579138
+        inSlope: 0.2180029
+        outSlope: 0.23249935
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    generationRange:
+      min: 0
+      max: 9
+  - rect:
+      serializedVersion: 2
+      x: 304.75
+      y: 532
+      width: 150
+      height: 50
+    title: Tree_1
+    octaves: 1
+    scale: 9
+    noiseHeight: 0
+    persistence: 0.47151357
+    lacunarity: 5.573346
+    meshHeightMultiplier: 3.2372916
+    meshHeightCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0
+        inSlope: 2
+        outSlope: 2
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 1
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    heightRemap:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0
+        inSlope: 1
+        outSlope: 1
+        tangentMode: 34
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 1
+        inSlope: 1
+        outSlope: 1
+        tangentMode: 34
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    generationRange:
+      min: 0
+      max: 8
+  - rect:
+      serializedVersion: 2
+      x: 504.75
+      y: 532
+      width: 150
+      height: 50
+    title: Tree_2
+    octaves: 1
+    scale: 1
+    noiseHeight: 0
+    persistence: 0.06250346
+    lacunarity: 3.2815738
+    meshHeightMultiplier: 2.3087897
+    meshHeightCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0.38906473
+        value: 0.7284332
+        inSlope: 0.15798734
+        outSlope: 0.30301297
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 0.8181085
+        value: 0.29243302
+        inSlope: -0.19577628
+        outSlope: -0.16533583
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 0.89707285
+        value: 0.5422111
+        inSlope: 0.19285129
+        outSlope: 0.48096657
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    heightRemap:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0.38906473
+        value: 0.7284332
+        inSlope: 0.15798734
+        outSlope: 0.30301297
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 0.8181085
+        value: 0.29243302
+        inSlope: -0.19577628
+        outSlope: -0.16533583
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 0.89707285
+        value: 0.5422111
+        inSlope: 0.19285129
+        outSlope: 0.48096657
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    generationRange:
+      min: 0
+      max: 3
+  - rect:
+      serializedVersion: 2
+      x: 704.75
+      y: 532
+      width: 150
+      height: 50
+    title: Dog
+    octaves: 1
+    scale: 7
+    noiseHeight: 0
+    persistence: 0.124
+    lacunarity: 8.02
+    meshHeightMultiplier: 3.924961
+    meshHeightCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0
+        inSlope: 2
+        outSlope: 2
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 1
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    heightRemap:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0
+        inSlope: 2
+        outSlope: 2
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 1
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    generationRange:
+      min: 0
+      max: 4
+  connectionData:
+  - inNodeIndex: 0
+    outNodeIndex: 1
+    type: 1
+  - inNodeIndex: 0
+    outNodeIndex: 2
+    type: 1
+  - inNodeIndex: 1
+    outNodeIndex: 3
+    type: 1
+  - inNodeIndex: 1
+    outNodeIndex: 4
+    type: 1
+  - inNodeIndex: 2
+    outNodeIndex: 5
+    type: 1
+  - inNodeIndex: 2
+    outNodeIndex: 6
+    type: 1

@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="ASCII"?>
+<map.map:StoryRoot xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:map.map="map.map" xsi:schemaLocation="map.map models/Map.ecore">
+  <insides xsi:type="map.map:Cyberpunk"/>
+</map.map:StoryRoot>

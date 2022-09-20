@@ -1,0 +1,42 @@
+package queries 
+import epackage "map.map"
+
+pattern isStoryRoot(a:Region){
+	StoryRoot(a);
+}
+pattern isCity(a:Region){
+	City(a);
+}
+pattern isCyberpunk(a:Region){
+	Cyberpunk(a);
+}
+pattern isTree_0(a:Region){
+	Tree_0(a);
+}
+pattern isTree_1(a:Region){
+	Tree_1(a);
+}
+pattern isTree_2(a:Region){
+	Tree_2(a);
+}
+pattern isDog(a:Region){
+	Dog(a);
+}
+@Constraint(key={a}, severity="error", message="error")
+pattern StoryRootInside(a: StoryRoot){
+	StoryRoot.insides(a,b);
+	neg find isCity(b);
+	neg find isCyberpunk(b);
+}
+@Constraint(key={a}, severity="error", message="error")
+pattern CityInside(a: City){
+	City.insides(a,b);
+	neg find isTree_0(b);
+	neg find isTree_1(b);
+}
+@Constraint(key={a}, severity="error", message="error")
+pattern CyberpunkInside(a: Cyberpunk){
+	Cyberpunk.insides(a,b);
+	neg find isTree_2(b);
+	neg find isDog(b);
+}

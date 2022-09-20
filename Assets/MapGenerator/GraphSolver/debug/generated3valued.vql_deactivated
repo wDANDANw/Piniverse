@@ -1,0 +1,1479 @@
+import epackage "http://www.bme.hu/mit/inf/dslreasoner/viatrasolver/partialinterpretationlanguage"
+import epackage "http://www.bme.hu/mit/inf/dslreasoner/logic/model/problem"
+import epackage "http://www.bme.hu/mit/inf/dslreasoner/logic/model/language"
+
+//////////
+// 0. Util
+//////////
+private pattern interpretation(problem:LogicProblem, interpretation:PartialInterpretation) {
+	PartialInterpretation.problem(interpretation,problem);
+}
+	
+/////////////////////////
+// 0.1 Existence
+/////////////////////////
+private pattern mustExist(problem:LogicProblem, interpretation:PartialInterpretation, element:DefinedElement) {
+	find interpretation(problem,interpretation);
+	LogicProblem.elements(problem,element);
+} or {
+	find interpretation(problem,interpretation);
+	PartialInterpretation.newElements(interpretation,element);
+}
+
+private pattern mayExist(problem:LogicProblem, interpretation:PartialInterpretation, element:DefinedElement) {
+    find mustExist(problem,interpretation,element);
+} or {
+    find interpretation(problem,interpretation);
+    neg find elementCloseWorld(element);
+    PartialInterpretation.openWorldElements(interpretation,element);
+}
+
+private pattern elementCloseWorld(element:DefinedElement) {
+	PartialInterpretation.openWorldElements(i,element);
+    PartialInterpretation.maxNewElements(i,0);
+} or {
+	Scope.targetTypeInterpretation(scope,interpretation);
+	PartialTypeInterpratation.elements(interpretation,element);
+	Scope.maxNewElements(scope,0);
+}
+
+////////////////////////
+// 0.2 Equivalence
+////////////////////////
+pattern mayEquivalent(problem:LogicProblem, interpretation:PartialInterpretation, a: DefinedElement, b: DefinedElement) {
+	find mayExist(problem,interpretation,a);
+	find mayExist(problem,interpretation,b);
+	a == b;
+}
+pattern mustEquivalent(problem:LogicProblem, interpretation:PartialInterpretation, a: DefinedElement, b: DefinedElement) {
+	find mustExist(problem,interpretation,a);
+	find mustExist(problem,interpretation,b);
+	a == b;
+}
+
+////////////////////////
+// 0.3 Required Patterns by TypeIndexer
+////////////////////////
+private pattern typeInterpretation(problem:LogicProblem, interpretation:PartialInterpretation, type:TypeDeclaration, typeInterpretation:PartialComplexTypeInterpretation) {
+	find interpretation(problem,interpretation);
+	LogicProblem.types(problem,type);
+	PartialInterpretation.partialtypeinterpratation(interpretation,typeInterpretation);
+	PartialComplexTypeInterpretation.interpretationOf(typeInterpretation,type);
+}
+
+private pattern directInstanceOf(problem:LogicProblem, interpretation:PartialInterpretation, element:DefinedElement, type:Type) {
+	find interpretation(problem,interpretation);
+	LogicProblem.types(problem,type);
+	TypeDefinition.elements(type,element);
+} or {
+	find interpretation(problem,interpretation);
+	find typeInterpretation(problem,interpretation,type,typeInterpretation);
+	PartialComplexTypeInterpretation.elements(typeInterpretation,element);
+}
+
+private pattern isPrimitive(element: PrimitiveElement) {
+	PrimitiveElement(element);
+}
+
+//////////
+// 1. Problem-Specific Base Indexers
+//////////
+// 1.1 Type Indexers
+//////////
+// 1.1.1 primitive Type Indexers
+//////////
+
+//////////
+// 1.1.2 domain-specific Type Indexers
+//////////
+/**
+ * An element must be an instance of type "StoryRoot class".
+ */
+private pattern mustInstanceOfStoryRoot_class(problem:LogicProblem, interpretation:PartialInterpretation, element:DefinedElement) {
+	Type.name(type,"StoryRoot class");
+	find directInstanceOf(problem,interpretation,element,type);
+}
+private pattern scopeDisallowsNewStoryRoot_class(problem:LogicProblem, interpretation:PartialInterpretation) {
+	find interpretation(problem,interpretation);
+	PartialInterpretation.scopes(interpretation,scope);
+	Scope.targetTypeInterpretation(scope,typeInterpretation);
+	Scope.maxNewElements(scope,0);
+	PartialComplexTypeInterpretation.interpretationOf(typeInterpretation,type);
+	Type.name(type,"StoryRoot class");
+}
+
+/**
+ * An element may be an instance of type "StoryRoot class".
+ */
+private pattern mayInstanceOfStoryRoot_class(problem:LogicProblem, interpretation:PartialInterpretation, element:DefinedElement)
+{
+	find interpretation(problem,interpretation);
+	PartialInterpretation.newElements(interpretation,element);
+	neg find mustInstanceOfRegion_class_UndefinedPart(problem,interpretation,element);
+	neg find scopeDisallowsNewStoryRoot_class(problem, interpretation);
+	neg find isPrimitive(element);
+} or {
+	find interpretation(problem,interpretation);
+	PartialInterpretation.openWorldElements(interpretation,element);
+	neg find mustInstanceOfRegion_class_UndefinedPart(problem,interpretation,element);
+	neg find scopeDisallowsNewStoryRoot_class(problem, interpretation);
+	neg find isPrimitive(element);
+} or
+{ find mustInstanceOfStoryRoot_class(problem,interpretation,element); }
+/**
+ * An element must be an instance of type "City class".
+ */
+private pattern mustInstanceOfCity_class(problem:LogicProblem, interpretation:PartialInterpretation, element:DefinedElement) {
+	Type.name(type,"City class");
+	find directInstanceOf(problem,interpretation,element,type);
+}
+private pattern scopeDisallowsNewCity_class(problem:LogicProblem, interpretation:PartialInterpretation) {
+	find interpretation(problem,interpretation);
+	PartialInterpretation.scopes(interpretation,scope);
+	Scope.targetTypeInterpretation(scope,typeInterpretation);
+	Scope.maxNewElements(scope,0);
+	PartialComplexTypeInterpretation.interpretationOf(typeInterpretation,type);
+	Type.name(type,"City class");
+}
+
+/**
+ * An element may be an instance of type "City class".
+ */
+private pattern mayInstanceOfCity_class(problem:LogicProblem, interpretation:PartialInterpretation, element:DefinedElement)
+{
+	find interpretation(problem,interpretation);
+	PartialInterpretation.newElements(interpretation,element);
+	neg find mustInstanceOfStoryRoot_class(problem,interpretation,element);
+	neg find mustInstanceOfElementaryRegion_class(problem,interpretation,element);
+	neg find mustInstanceOfCyberpunk_class(problem,interpretation,element);
+	neg find scopeDisallowsNewCity_class(problem, interpretation);
+	neg find isPrimitive(element);
+} or {
+	find interpretation(problem,interpretation);
+	PartialInterpretation.openWorldElements(interpretation,element);
+	neg find mustInstanceOfStoryRoot_class(problem,interpretation,element);
+	neg find mustInstanceOfElementaryRegion_class(problem,interpretation,element);
+	neg find mustInstanceOfCyberpunk_class(problem,interpretation,element);
+	neg find scopeDisallowsNewCity_class(problem, interpretation);
+	neg find isPrimitive(element);
+} or
+{ find mustInstanceOfCity_class(problem,interpretation,element); }
+/**
+ * An element must be an instance of type "Cyberpunk class".
+ */
+private pattern mustInstanceOfCyberpunk_class(problem:LogicProblem, interpretation:PartialInterpretation, element:DefinedElement) {
+	Type.name(type,"Cyberpunk class");
+	find directInstanceOf(problem,interpretation,element,type);
+}
+private pattern scopeDisallowsNewCyberpunk_class(problem:LogicProblem, interpretation:PartialInterpretation) {
+	find interpretation(problem,interpretation);
+	PartialInterpretation.scopes(interpretation,scope);
+	Scope.targetTypeInterpretation(scope,typeInterpretation);
+	Scope.maxNewElements(scope,0);
+	PartialComplexTypeInterpretation.interpretationOf(typeInterpretation,type);
+	Type.name(type,"Cyberpunk class");
+}
+
+/**
+ * An element may be an instance of type "Cyberpunk class".
+ */
+private pattern mayInstanceOfCyberpunk_class(problem:LogicProblem, interpretation:PartialInterpretation, element:DefinedElement)
+{
+	find interpretation(problem,interpretation);
+	PartialInterpretation.newElements(interpretation,element);
+	neg find mustInstanceOfCity_class(problem,interpretation,element);
+	neg find mustInstanceOfStoryRoot_class(problem,interpretation,element);
+	neg find mustInstanceOfElementaryRegion_class(problem,interpretation,element);
+	neg find scopeDisallowsNewCyberpunk_class(problem, interpretation);
+	neg find isPrimitive(element);
+} or {
+	find interpretation(problem,interpretation);
+	PartialInterpretation.openWorldElements(interpretation,element);
+	neg find mustInstanceOfCity_class(problem,interpretation,element);
+	neg find mustInstanceOfStoryRoot_class(problem,interpretation,element);
+	neg find mustInstanceOfElementaryRegion_class(problem,interpretation,element);
+	neg find scopeDisallowsNewCyberpunk_class(problem, interpretation);
+	neg find isPrimitive(element);
+} or
+{ find mustInstanceOfCyberpunk_class(problem,interpretation,element); }
+/**
+ * An element must be an instance of type "Tree_0 class".
+ */
+private pattern mustInstanceOfTree_0_class(problem:LogicProblem, interpretation:PartialInterpretation, element:DefinedElement) {
+	Type.name(type,"Tree_0 class");
+	find directInstanceOf(problem,interpretation,element,type);
+}
+private pattern scopeDisallowsNewTree_0_class(problem:LogicProblem, interpretation:PartialInterpretation) {
+	find interpretation(problem,interpretation);
+	PartialInterpretation.scopes(interpretation,scope);
+	Scope.targetTypeInterpretation(scope,typeInterpretation);
+	Scope.maxNewElements(scope,0);
+	PartialComplexTypeInterpretation.interpretationOf(typeInterpretation,type);
+	Type.name(type,"Tree_0 class");
+}
+
+/**
+ * An element may be an instance of type "Tree_0 class".
+ */
+private pattern mayInstanceOfTree_0_class(problem:LogicProblem, interpretation:PartialInterpretation, element:DefinedElement)
+{
+	find interpretation(problem,interpretation);
+	PartialInterpretation.newElements(interpretation,element);
+	neg find mustInstanceOfDog_class(problem,interpretation,element);
+	neg find mustInstanceOfTree_1_class(problem,interpretation,element);
+	neg find mustInstanceOfTree_2_class(problem,interpretation,element);
+	neg find mustInstanceOfCompositeRegion_class(problem,interpretation,element);
+	neg find scopeDisallowsNewTree_0_class(problem, interpretation);
+	neg find isPrimitive(element);
+} or {
+	find interpretation(problem,interpretation);
+	PartialInterpretation.openWorldElements(interpretation,element);
+	neg find mustInstanceOfDog_class(problem,interpretation,element);
+	neg find mustInstanceOfTree_1_class(problem,interpretation,element);
+	neg find mustInstanceOfTree_2_class(problem,interpretation,element);
+	neg find mustInstanceOfCompositeRegion_class(problem,interpretation,element);
+	neg find scopeDisallowsNewTree_0_class(problem, interpretation);
+	neg find isPrimitive(element);
+} or
+{ find mustInstanceOfTree_0_class(problem,interpretation,element); }
+/**
+ * An element must be an instance of type "Tree_1 class".
+ */
+private pattern mustInstanceOfTree_1_class(problem:LogicProblem, interpretation:PartialInterpretation, element:DefinedElement) {
+	Type.name(type,"Tree_1 class");
+	find directInstanceOf(problem,interpretation,element,type);
+}
+private pattern scopeDisallowsNewTree_1_class(problem:LogicProblem, interpretation:PartialInterpretation) {
+	find interpretation(problem,interpretation);
+	PartialInterpretation.scopes(interpretation,scope);
+	Scope.targetTypeInterpretation(scope,typeInterpretation);
+	Scope.maxNewElements(scope,0);
+	PartialComplexTypeInterpretation.interpretationOf(typeInterpretation,type);
+	Type.name(type,"Tree_1 class");
+}
+
+/**
+ * An element may be an instance of type "Tree_1 class".
+ */
+private pattern mayInstanceOfTree_1_class(problem:LogicProblem, interpretation:PartialInterpretation, element:DefinedElement)
+{
+	find interpretation(problem,interpretation);
+	PartialInterpretation.newElements(interpretation,element);
+	neg find mustInstanceOfDog_class(problem,interpretation,element);
+	neg find mustInstanceOfTree_2_class(problem,interpretation,element);
+	neg find mustInstanceOfCompositeRegion_class(problem,interpretation,element);
+	neg find mustInstanceOfTree_0_class(problem,interpretation,element);
+	neg find scopeDisallowsNewTree_1_class(problem, interpretation);
+	neg find isPrimitive(element);
+} or {
+	find interpretation(problem,interpretation);
+	PartialInterpretation.openWorldElements(interpretation,element);
+	neg find mustInstanceOfDog_class(problem,interpretation,element);
+	neg find mustInstanceOfTree_2_class(problem,interpretation,element);
+	neg find mustInstanceOfCompositeRegion_class(problem,interpretation,element);
+	neg find mustInstanceOfTree_0_class(problem,interpretation,element);
+	neg find scopeDisallowsNewTree_1_class(problem, interpretation);
+	neg find isPrimitive(element);
+} or
+{ find mustInstanceOfTree_1_class(problem,interpretation,element); }
+/**
+ * An element must be an instance of type "Tree_2 class".
+ */
+private pattern mustInstanceOfTree_2_class(problem:LogicProblem, interpretation:PartialInterpretation, element:DefinedElement) {
+	Type.name(type,"Tree_2 class");
+	find directInstanceOf(problem,interpretation,element,type);
+}
+private pattern scopeDisallowsNewTree_2_class(problem:LogicProblem, interpretation:PartialInterpretation) {
+	find interpretation(problem,interpretation);
+	PartialInterpretation.scopes(interpretation,scope);
+	Scope.targetTypeInterpretation(scope,typeInterpretation);
+	Scope.maxNewElements(scope,0);
+	PartialComplexTypeInterpretation.interpretationOf(typeInterpretation,type);
+	Type.name(type,"Tree_2 class");
+}
+
+/**
+ * An element may be an instance of type "Tree_2 class".
+ */
+private pattern mayInstanceOfTree_2_class(problem:LogicProblem, interpretation:PartialInterpretation, element:DefinedElement)
+{
+	find interpretation(problem,interpretation);
+	PartialInterpretation.newElements(interpretation,element);
+	neg find mustInstanceOfDog_class(problem,interpretation,element);
+	neg find mustInstanceOfTree_1_class(problem,interpretation,element);
+	neg find mustInstanceOfCompositeRegion_class(problem,interpretation,element);
+	neg find mustInstanceOfTree_0_class(problem,interpretation,element);
+	neg find scopeDisallowsNewTree_2_class(problem, interpretation);
+	neg find isPrimitive(element);
+} or {
+	find interpretation(problem,interpretation);
+	PartialInterpretation.openWorldElements(interpretation,element);
+	neg find mustInstanceOfDog_class(problem,interpretation,element);
+	neg find mustInstanceOfTree_1_class(problem,interpretation,element);
+	neg find mustInstanceOfCompositeRegion_class(problem,interpretation,element);
+	neg find mustInstanceOfTree_0_class(problem,interpretation,element);
+	neg find scopeDisallowsNewTree_2_class(problem, interpretation);
+	neg find isPrimitive(element);
+} or
+{ find mustInstanceOfTree_2_class(problem,interpretation,element); }
+/**
+ * An element must be an instance of type "Dog class".
+ */
+private pattern mustInstanceOfDog_class(problem:LogicProblem, interpretation:PartialInterpretation, element:DefinedElement) {
+	Type.name(type,"Dog class");
+	find directInstanceOf(problem,interpretation,element,type);
+}
+private pattern scopeDisallowsNewDog_class(problem:LogicProblem, interpretation:PartialInterpretation) {
+	find interpretation(problem,interpretation);
+	PartialInterpretation.scopes(interpretation,scope);
+	Scope.targetTypeInterpretation(scope,typeInterpretation);
+	Scope.maxNewElements(scope,0);
+	PartialComplexTypeInterpretation.interpretationOf(typeInterpretation,type);
+	Type.name(type,"Dog class");
+}
+
+/**
+ * An element may be an instance of type "Dog class".
+ */
+private pattern mayInstanceOfDog_class(problem:LogicProblem, interpretation:PartialInterpretation, element:DefinedElement)
+{
+	find interpretation(problem,interpretation);
+	PartialInterpretation.newElements(interpretation,element);
+	neg find mustInstanceOfTree_2_class(problem,interpretation,element);
+	neg find mustInstanceOfTree_1_class(problem,interpretation,element);
+	neg find mustInstanceOfCompositeRegion_class(problem,interpretation,element);
+	neg find mustInstanceOfTree_0_class(problem,interpretation,element);
+	neg find scopeDisallowsNewDog_class(problem, interpretation);
+	neg find isPrimitive(element);
+} or {
+	find interpretation(problem,interpretation);
+	PartialInterpretation.openWorldElements(interpretation,element);
+	neg find mustInstanceOfTree_2_class(problem,interpretation,element);
+	neg find mustInstanceOfTree_1_class(problem,interpretation,element);
+	neg find mustInstanceOfCompositeRegion_class(problem,interpretation,element);
+	neg find mustInstanceOfTree_0_class(problem,interpretation,element);
+	neg find scopeDisallowsNewDog_class(problem, interpretation);
+	neg find isPrimitive(element);
+} or
+{ find mustInstanceOfDog_class(problem,interpretation,element); }
+/**
+ * An element must be an instance of type "Region class".
+ */
+private pattern mustInstanceOfRegion_class(problem:LogicProblem, interpretation:PartialInterpretation, element:DefinedElement) {
+	Type.name(type,"Region class");
+	find directInstanceOf(problem,interpretation,element,type);
+}
+private pattern scopeDisallowsNewRegion_class(problem:LogicProblem, interpretation:PartialInterpretation) {
+	find interpretation(problem,interpretation);
+	PartialInterpretation.scopes(interpretation,scope);
+	Scope.targetTypeInterpretation(scope,typeInterpretation);
+	Scope.maxNewElements(scope,0);
+	PartialComplexTypeInterpretation.interpretationOf(typeInterpretation,type);
+	Type.name(type,"Region class");
+}
+
+/**
+ * An element may be an instance of type "Region class".
+ */
+private pattern mayInstanceOfRegion_class(problem:LogicProblem, interpretation:PartialInterpretation, element:DefinedElement)
+{
+	find interpretation(problem,interpretation);
+	PartialInterpretation.newElements(interpretation,element);
+	neg find mustInstanceOfRegion_class_UndefinedPart(problem,interpretation,element);
+	neg find mustInstanceOfCompositeRegion_class(problem,interpretation,element);
+	neg find scopeDisallowsNewRegion_class(problem, interpretation);
+	neg find isPrimitive(element);
+} or {
+	find interpretation(problem,interpretation);
+	PartialInterpretation.openWorldElements(interpretation,element);
+	neg find mustInstanceOfRegion_class_UndefinedPart(problem,interpretation,element);
+	neg find mustInstanceOfCompositeRegion_class(problem,interpretation,element);
+	neg find scopeDisallowsNewRegion_class(problem, interpretation);
+	neg find isPrimitive(element);
+} or
+{ find mustInstanceOfRegion_class(problem,interpretation,element); }
+/**
+ * An element must be an instance of type "ElementaryRegion class".
+ */
+private pattern mustInstanceOfElementaryRegion_class(problem:LogicProblem, interpretation:PartialInterpretation, element:DefinedElement) {
+	Type.name(type,"ElementaryRegion class");
+	find directInstanceOf(problem,interpretation,element,type);
+}
+private pattern scopeDisallowsNewElementaryRegion_class(problem:LogicProblem, interpretation:PartialInterpretation) {
+	find interpretation(problem,interpretation);
+	PartialInterpretation.scopes(interpretation,scope);
+	Scope.targetTypeInterpretation(scope,typeInterpretation);
+	Scope.maxNewElements(scope,0);
+	PartialComplexTypeInterpretation.interpretationOf(typeInterpretation,type);
+	Type.name(type,"ElementaryRegion class");
+}
+
+/**
+ * An element may be an instance of type "ElementaryRegion class".
+ */
+private pattern mayInstanceOfElementaryRegion_class(problem:LogicProblem, interpretation:PartialInterpretation, element:DefinedElement)
+{
+	find interpretation(problem,interpretation);
+	PartialInterpretation.newElements(interpretation,element);
+	neg find mustInstanceOfDog_class(problem,interpretation,element);
+	neg find mustInstanceOfTree_1_class(problem,interpretation,element);
+	neg find mustInstanceOfTree_2_class(problem,interpretation,element);
+	neg find mustInstanceOfCompositeRegion_class(problem,interpretation,element);
+	neg find mustInstanceOfTree_0_class(problem,interpretation,element);
+	neg find scopeDisallowsNewElementaryRegion_class(problem, interpretation);
+	neg find isPrimitive(element);
+} or {
+	find interpretation(problem,interpretation);
+	PartialInterpretation.openWorldElements(interpretation,element);
+	neg find mustInstanceOfDog_class(problem,interpretation,element);
+	neg find mustInstanceOfTree_1_class(problem,interpretation,element);
+	neg find mustInstanceOfTree_2_class(problem,interpretation,element);
+	neg find mustInstanceOfCompositeRegion_class(problem,interpretation,element);
+	neg find mustInstanceOfTree_0_class(problem,interpretation,element);
+	neg find scopeDisallowsNewElementaryRegion_class(problem, interpretation);
+	neg find isPrimitive(element);
+} or
+{ find mustInstanceOfElementaryRegion_class(problem,interpretation,element); }
+/**
+ * An element must be an instance of type "CompositeRegion class".
+ */
+private pattern mustInstanceOfCompositeRegion_class(problem:LogicProblem, interpretation:PartialInterpretation, element:DefinedElement) {
+	Type.name(type,"CompositeRegion class");
+	find directInstanceOf(problem,interpretation,element,type);
+}
+private pattern scopeDisallowsNewCompositeRegion_class(problem:LogicProblem, interpretation:PartialInterpretation) {
+	find interpretation(problem,interpretation);
+	PartialInterpretation.scopes(interpretation,scope);
+	Scope.targetTypeInterpretation(scope,typeInterpretation);
+	Scope.maxNewElements(scope,0);
+	PartialComplexTypeInterpretation.interpretationOf(typeInterpretation,type);
+	Type.name(type,"CompositeRegion class");
+}
+
+/**
+ * An element may be an instance of type "CompositeRegion class".
+ */
+private pattern mayInstanceOfCompositeRegion_class(problem:LogicProblem, interpretation:PartialInterpretation, element:DefinedElement)
+{
+	find interpretation(problem,interpretation);
+	PartialInterpretation.newElements(interpretation,element);
+	neg find mustInstanceOfStoryRoot_class(problem,interpretation,element);
+	neg find mustInstanceOfRegion_class_UndefinedPart(problem,interpretation,element);
+	neg find scopeDisallowsNewCompositeRegion_class(problem, interpretation);
+	neg find isPrimitive(element);
+} or {
+	find interpretation(problem,interpretation);
+	PartialInterpretation.openWorldElements(interpretation,element);
+	neg find mustInstanceOfStoryRoot_class(problem,interpretation,element);
+	neg find mustInstanceOfRegion_class_UndefinedPart(problem,interpretation,element);
+	neg find scopeDisallowsNewCompositeRegion_class(problem, interpretation);
+	neg find isPrimitive(element);
+} or
+{ find mustInstanceOfCompositeRegion_class(problem,interpretation,element); }
+/**
+ * An element must be an instance of type "StoryRoot class DefinedPart".
+ */
+private pattern mustInstanceOfStoryRoot_class_DefinedPart(problem:LogicProblem, interpretation:PartialInterpretation, element:DefinedElement) {
+	Type.name(type,"StoryRoot class DefinedPart");
+	find directInstanceOf(problem,interpretation,element,type);
+}
+private pattern scopeDisallowsNewStoryRoot_class_DefinedPart(problem:LogicProblem, interpretation:PartialInterpretation) {
+	find interpretation(problem,interpretation);
+	PartialInterpretation.scopes(interpretation,scope);
+	Scope.targetTypeInterpretation(scope,typeInterpretation);
+	Scope.maxNewElements(scope,0);
+	PartialComplexTypeInterpretation.interpretationOf(typeInterpretation,type);
+	Type.name(type,"StoryRoot class DefinedPart");
+}
+
+/**
+ * An element may be an instance of type "StoryRoot class DefinedPart".
+ */
+private pattern mayInstanceOfStoryRoot_class_DefinedPart(problem:LogicProblem, interpretation:PartialInterpretation, element:DefinedElement)
+{ find mustInstanceOfStoryRoot_class_DefinedPart(problem,interpretation,element); }
+/**
+ * An element must be an instance of type "StoryRoot class UndefinedPart".
+ */
+private pattern mustInstanceOfStoryRoot_class_UndefinedPart(problem:LogicProblem, interpretation:PartialInterpretation, element:DefinedElement) {
+	Type.name(type,"StoryRoot class UndefinedPart");
+	find directInstanceOf(problem,interpretation,element,type);
+}
+private pattern scopeDisallowsNewStoryRoot_class_UndefinedPart(problem:LogicProblem, interpretation:PartialInterpretation) {
+	find interpretation(problem,interpretation);
+	PartialInterpretation.scopes(interpretation,scope);
+	Scope.targetTypeInterpretation(scope,typeInterpretation);
+	Scope.maxNewElements(scope,0);
+	PartialComplexTypeInterpretation.interpretationOf(typeInterpretation,type);
+	Type.name(type,"StoryRoot class UndefinedPart");
+}
+
+/**
+ * An element may be an instance of type "StoryRoot class UndefinedPart".
+ */
+private pattern mayInstanceOfStoryRoot_class_UndefinedPart(problem:LogicProblem, interpretation:PartialInterpretation, element:DefinedElement)
+{
+	find interpretation(problem,interpretation);
+	PartialInterpretation.newElements(interpretation,element);
+	neg find mustInstanceOfCity_class(problem,interpretation,element);
+	neg find mustInstanceOfElementaryRegion_class(problem,interpretation,element);
+	neg find mustInstanceOfCyberpunk_class(problem,interpretation,element);
+	neg find scopeDisallowsNewStoryRoot_class_UndefinedPart(problem, interpretation);
+	neg find isPrimitive(element);
+} or {
+	find interpretation(problem,interpretation);
+	PartialInterpretation.openWorldElements(interpretation,element);
+	neg find mustInstanceOfCity_class(problem,interpretation,element);
+	neg find mustInstanceOfElementaryRegion_class(problem,interpretation,element);
+	neg find mustInstanceOfCyberpunk_class(problem,interpretation,element);
+	neg find scopeDisallowsNewStoryRoot_class_UndefinedPart(problem, interpretation);
+	neg find isPrimitive(element);
+} or
+{ find mustInstanceOfStoryRoot_class_UndefinedPart(problem,interpretation,element); }
+/**
+ * An element must be an instance of type "Region class DefinedPart".
+ */
+private pattern mustInstanceOfRegion_class_DefinedPart(problem:LogicProblem, interpretation:PartialInterpretation, element:DefinedElement) {
+	Type.name(type,"Region class DefinedPart");
+	find directInstanceOf(problem,interpretation,element,type);
+}
+private pattern scopeDisallowsNewRegion_class_DefinedPart(problem:LogicProblem, interpretation:PartialInterpretation) {
+	find interpretation(problem,interpretation);
+	PartialInterpretation.scopes(interpretation,scope);
+	Scope.targetTypeInterpretation(scope,typeInterpretation);
+	Scope.maxNewElements(scope,0);
+	PartialComplexTypeInterpretation.interpretationOf(typeInterpretation,type);
+	Type.name(type,"Region class DefinedPart");
+}
+
+/**
+ * An element may be an instance of type "Region class DefinedPart".
+ */
+private pattern mayInstanceOfRegion_class_DefinedPart(problem:LogicProblem, interpretation:PartialInterpretation, element:DefinedElement)
+{ find mustInstanceOfRegion_class_DefinedPart(problem,interpretation,element); }
+/**
+ * An element must be an instance of type "Region class UndefinedPart".
+ */
+private pattern mustInstanceOfRegion_class_UndefinedPart(problem:LogicProblem, interpretation:PartialInterpretation, element:DefinedElement) {
+	Type.name(type,"Region class UndefinedPart");
+	find directInstanceOf(problem,interpretation,element,type);
+}
+private pattern scopeDisallowsNewRegion_class_UndefinedPart(problem:LogicProblem, interpretation:PartialInterpretation) {
+	find interpretation(problem,interpretation);
+	PartialInterpretation.scopes(interpretation,scope);
+	Scope.targetTypeInterpretation(scope,typeInterpretation);
+	Scope.maxNewElements(scope,0);
+	PartialComplexTypeInterpretation.interpretationOf(typeInterpretation,type);
+	Type.name(type,"Region class UndefinedPart");
+}
+
+/**
+ * An element may be an instance of type "Region class UndefinedPart".
+ */
+private pattern mayInstanceOfRegion_class_UndefinedPart(problem:LogicProblem, interpretation:PartialInterpretation, element:DefinedElement)
+{
+	find interpretation(problem,interpretation);
+	PartialInterpretation.newElements(interpretation,element);
+	neg find mustInstanceOfElementaryRegion_class(problem,interpretation,element);
+	neg find mustInstanceOfCompositeRegion_class(problem,interpretation,element);
+	neg find scopeDisallowsNewRegion_class_UndefinedPart(problem, interpretation);
+	neg find isPrimitive(element);
+} or {
+	find interpretation(problem,interpretation);
+	PartialInterpretation.openWorldElements(interpretation,element);
+	neg find mustInstanceOfElementaryRegion_class(problem,interpretation,element);
+	neg find mustInstanceOfCompositeRegion_class(problem,interpretation,element);
+	neg find scopeDisallowsNewRegion_class_UndefinedPart(problem, interpretation);
+	neg find isPrimitive(element);
+} or
+{ find mustInstanceOfRegion_class_UndefinedPart(problem,interpretation,element); }
+/**
+ * An element must be an instance of type "CompositeRegion class DefinedPart".
+ */
+private pattern mustInstanceOfCompositeRegion_class_DefinedPart(problem:LogicProblem, interpretation:PartialInterpretation, element:DefinedElement) {
+	Type.name(type,"CompositeRegion class DefinedPart");
+	find directInstanceOf(problem,interpretation,element,type);
+}
+private pattern scopeDisallowsNewCompositeRegion_class_DefinedPart(problem:LogicProblem, interpretation:PartialInterpretation) {
+	find interpretation(problem,interpretation);
+	PartialInterpretation.scopes(interpretation,scope);
+	Scope.targetTypeInterpretation(scope,typeInterpretation);
+	Scope.maxNewElements(scope,0);
+	PartialComplexTypeInterpretation.interpretationOf(typeInterpretation,type);
+	Type.name(type,"CompositeRegion class DefinedPart");
+}
+
+/**
+ * An element may be an instance of type "CompositeRegion class DefinedPart".
+ */
+private pattern mayInstanceOfCompositeRegion_class_DefinedPart(problem:LogicProblem, interpretation:PartialInterpretation, element:DefinedElement)
+{ find mustInstanceOfCompositeRegion_class_DefinedPart(problem,interpretation,element); }
+/**
+ * An element must be an instance of type "CompositeRegion class UndefinedPart".
+ */
+private pattern mustInstanceOfCompositeRegion_class_UndefinedPart(problem:LogicProblem, interpretation:PartialInterpretation, element:DefinedElement) {
+	Type.name(type,"CompositeRegion class UndefinedPart");
+	find directInstanceOf(problem,interpretation,element,type);
+}
+private pattern scopeDisallowsNewCompositeRegion_class_UndefinedPart(problem:LogicProblem, interpretation:PartialInterpretation) {
+	find interpretation(problem,interpretation);
+	PartialInterpretation.scopes(interpretation,scope);
+	Scope.targetTypeInterpretation(scope,typeInterpretation);
+	Scope.maxNewElements(scope,0);
+	PartialComplexTypeInterpretation.interpretationOf(typeInterpretation,type);
+	Type.name(type,"CompositeRegion class UndefinedPart");
+}
+
+/**
+ * An element may be an instance of type "CompositeRegion class UndefinedPart".
+ */
+private pattern mayInstanceOfCompositeRegion_class_UndefinedPart(problem:LogicProblem, interpretation:PartialInterpretation, element:DefinedElement)
+{
+	find interpretation(problem,interpretation);
+	PartialInterpretation.newElements(interpretation,element);
+	neg find mustInstanceOfCity_class(problem,interpretation,element);
+	neg find mustInstanceOfStoryRoot_class(problem,interpretation,element);
+	neg find mustInstanceOfElementaryRegion_class(problem,interpretation,element);
+	neg find mustInstanceOfCyberpunk_class(problem,interpretation,element);
+	neg find scopeDisallowsNewCompositeRegion_class_UndefinedPart(problem, interpretation);
+	neg find isPrimitive(element);
+} or {
+	find interpretation(problem,interpretation);
+	PartialInterpretation.openWorldElements(interpretation,element);
+	neg find mustInstanceOfCity_class(problem,interpretation,element);
+	neg find mustInstanceOfStoryRoot_class(problem,interpretation,element);
+	neg find mustInstanceOfElementaryRegion_class(problem,interpretation,element);
+	neg find mustInstanceOfCyberpunk_class(problem,interpretation,element);
+	neg find scopeDisallowsNewCompositeRegion_class_UndefinedPart(problem, interpretation);
+	neg find isPrimitive(element);
+} or
+{ find mustInstanceOfCompositeRegion_class_UndefinedPart(problem,interpretation,element); }
+
+//////////
+// 1.2 Relation Declaration Indexers
+//////////
+/**
+ * Matcher for detecting tuples t where []next reference Region(source,target)
+ */
+private pattern mustInRelationnext_reference_Region(
+	problem:LogicProblem, interpretation:PartialInterpretation,
+	source: DefinedElement, target:DefinedElement)
+{
+	find interpretation(problem,interpretation);
+	PartialInterpretation.partialrelationinterpretation(interpretation,relationIterpretation);
+	PartialRelationInterpretation.interpretationOf.name(relationIterpretation,"next reference Region");
+	PartialRelationInterpretation.relationlinks(relationIterpretation,link);
+	BinaryElementRelationLink.param1(link,source);
+	BinaryElementRelationLink.param2(link,target);
+}
+/**
+ * Matcher for detecting tuples t where <>next reference Region(source,target)
+ */
+private pattern mayInRelationnext_reference_Region(
+	problem:LogicProblem, interpretation:PartialInterpretation,
+	source: DefinedElement, target:DefinedElement)
+{
+	find interpretation(problem,interpretation);
+	// The two endpoint of the link have to exist
+	find mayExist(problem, interpretation, source);
+	find mayExist(problem, interpretation, target);
+	// Type consistency
+	find mayInstanceOfRegion_class(problem,interpretation,source);
+	find mayInstanceOfRegion_class(problem,interpretation,target);
+	// There are "numberOfExistingReferences" currently existing instances of the reference from the source,
+	// the upper bound of the multiplicity should be considered.
+	numberOfExistingReferences == count find mustInRelationnext_reference_Region(problem,interpretation,source,_);
+	check(numberOfExistingReferences < 1);
+	// There are "numberOfExistingReferences" currently existing instances of the reference to the target,
+	// the upper bound of the opposite reference multiplicity should be considered.
+	numberOfExistingOppositeReferences == count find mustInRelationnext_reference_Region(problem,interpretation,target,_);
+	check(numberOfExistingOppositeReferences < 1);
+} or {
+	find mustInRelationnext_reference_Region(problem,interpretation,source,target);
+}
+/**
+ * Matcher for detecting tuples t where []insides reference CompositeRegion(source,target)
+ */
+private pattern mustInRelationinsides_reference_CompositeRegion(
+	problem:LogicProblem, interpretation:PartialInterpretation,
+	source: DefinedElement, target:DefinedElement)
+{
+	find interpretation(problem,interpretation);
+	PartialInterpretation.partialrelationinterpretation(interpretation,relationIterpretation);
+	PartialRelationInterpretation.interpretationOf.name(relationIterpretation,"insides reference CompositeRegion");
+	PartialRelationInterpretation.relationlinks(relationIterpretation,link);
+	BinaryElementRelationLink.param1(link,source);
+	BinaryElementRelationLink.param2(link,target);
+}
+/**
+ * Matcher for detecting tuples t where <>insides reference CompositeRegion(source,target)
+ */
+private pattern mayInRelationinsides_reference_CompositeRegion(
+	problem:LogicProblem, interpretation:PartialInterpretation,
+	source: DefinedElement, target:DefinedElement)
+{
+	find interpretation(problem,interpretation);
+	// The two endpoint of the link have to exist
+	find mayExist(problem, interpretation, source);
+	find mayExist(problem, interpretation, target);
+	// Type consistency
+	find mayInstanceOfCompositeRegion_class(problem,interpretation,source);
+	find mayInstanceOfRegion_class(problem,interpretation,target);
+	// The reference is containment, then a new reference cannot be create if:
+	// 1. Multiple parents
+	neg find mustContains4(problem,interpretation,_,target);
+	// 2. Circle in the containment hierarchy
+	neg find mustTransitiveContains(source,target);
+} or {
+	find mustInRelationinsides_reference_CompositeRegion(problem,interpretation,source,target);
+}
+
+//////////
+// 1.3 Relation Definition Indexers
+//////////
+// Must, May and Current queries for pattern queries isStoryRoot
+private pattern mustInRelation_pattern_queries_isStoryRoot(
+	problem:LogicProblem, interpretation:PartialInterpretation,
+	var_a)
+{
+	find interpretation(problem,interpretation);
+	find mustInstanceOfRegion_class(problem,interpretation,var_a);
+	// a is exported
+	find mustInstanceOfStoryRoot_class(problem,interpretation,var_a);
+}
+private pattern mayInRelation_pattern_queries_isStoryRoot(
+	problem:LogicProblem, interpretation:PartialInterpretation,
+	var_a)
+{
+	find interpretation(problem,interpretation);
+	find mayInstanceOfRegion_class(problem,interpretation,var_a);
+	// a is exported
+	find mayInstanceOfStoryRoot_class(problem,interpretation,var_a);
+}
+private pattern currentInRelation_pattern_queries_isStoryRoot(
+	problem:LogicProblem, interpretation:PartialInterpretation,
+	var_a)
+{
+	find interpretation(problem,interpretation);
+	find mustInstanceOfRegion_class(problem,interpretation,var_a);
+	// a is exported
+	find mustInstanceOfStoryRoot_class(problem,interpretation,var_a);
+}
+// Must, May and Current queries for pattern queries isCity
+private pattern mustInRelation_pattern_queries_isCity(
+	problem:LogicProblem, interpretation:PartialInterpretation,
+	var_a)
+{
+	find interpretation(problem,interpretation);
+	find mustInstanceOfRegion_class(problem,interpretation,var_a);
+	// a is exported
+	find mustInstanceOfCity_class(problem,interpretation,var_a);
+}
+private pattern mayInRelation_pattern_queries_isCity(
+	problem:LogicProblem, interpretation:PartialInterpretation,
+	var_a)
+{
+	find interpretation(problem,interpretation);
+	find mayInstanceOfRegion_class(problem,interpretation,var_a);
+	// a is exported
+	find mayInstanceOfCity_class(problem,interpretation,var_a);
+}
+private pattern currentInRelation_pattern_queries_isCity(
+	problem:LogicProblem, interpretation:PartialInterpretation,
+	var_a)
+{
+	find interpretation(problem,interpretation);
+	find mustInstanceOfRegion_class(problem,interpretation,var_a);
+	// a is exported
+	find mustInstanceOfCity_class(problem,interpretation,var_a);
+}
+// Must, May and Current queries for pattern queries isCyberpunk
+private pattern mustInRelation_pattern_queries_isCyberpunk(
+	problem:LogicProblem, interpretation:PartialInterpretation,
+	var_a)
+{
+	find interpretation(problem,interpretation);
+	find mustInstanceOfRegion_class(problem,interpretation,var_a);
+	// a is exported
+	find mustInstanceOfCyberpunk_class(problem,interpretation,var_a);
+}
+private pattern mayInRelation_pattern_queries_isCyberpunk(
+	problem:LogicProblem, interpretation:PartialInterpretation,
+	var_a)
+{
+	find interpretation(problem,interpretation);
+	find mayInstanceOfRegion_class(problem,interpretation,var_a);
+	// a is exported
+	find mayInstanceOfCyberpunk_class(problem,interpretation,var_a);
+}
+private pattern currentInRelation_pattern_queries_isCyberpunk(
+	problem:LogicProblem, interpretation:PartialInterpretation,
+	var_a)
+{
+	find interpretation(problem,interpretation);
+	find mustInstanceOfRegion_class(problem,interpretation,var_a);
+	// a is exported
+	find mustInstanceOfCyberpunk_class(problem,interpretation,var_a);
+}
+// Must, May and Current queries for pattern queries isTree_0
+private pattern mustInRelation_pattern_queries_isTree_0(
+	problem:LogicProblem, interpretation:PartialInterpretation,
+	var_a)
+{
+	find interpretation(problem,interpretation);
+	find mustInstanceOfRegion_class(problem,interpretation,var_a);
+	// a is exported
+	find mustInstanceOfTree_0_class(problem,interpretation,var_a);
+}
+private pattern mayInRelation_pattern_queries_isTree_0(
+	problem:LogicProblem, interpretation:PartialInterpretation,
+	var_a)
+{
+	find interpretation(problem,interpretation);
+	find mayInstanceOfRegion_class(problem,interpretation,var_a);
+	// a is exported
+	find mayInstanceOfTree_0_class(problem,interpretation,var_a);
+}
+private pattern currentInRelation_pattern_queries_isTree_0(
+	problem:LogicProblem, interpretation:PartialInterpretation,
+	var_a)
+{
+	find interpretation(problem,interpretation);
+	find mustInstanceOfRegion_class(problem,interpretation,var_a);
+	// a is exported
+	find mustInstanceOfTree_0_class(problem,interpretation,var_a);
+}
+// Must, May and Current queries for pattern queries isTree_1
+private pattern mustInRelation_pattern_queries_isTree_1(
+	problem:LogicProblem, interpretation:PartialInterpretation,
+	var_a)
+{
+	find interpretation(problem,interpretation);
+	find mustInstanceOfRegion_class(problem,interpretation,var_a);
+	// a is exported
+	find mustInstanceOfTree_1_class(problem,interpretation,var_a);
+}
+private pattern mayInRelation_pattern_queries_isTree_1(
+	problem:LogicProblem, interpretation:PartialInterpretation,
+	var_a)
+{
+	find interpretation(problem,interpretation);
+	find mayInstanceOfRegion_class(problem,interpretation,var_a);
+	// a is exported
+	find mayInstanceOfTree_1_class(problem,interpretation,var_a);
+}
+private pattern currentInRelation_pattern_queries_isTree_1(
+	problem:LogicProblem, interpretation:PartialInterpretation,
+	var_a)
+{
+	find interpretation(problem,interpretation);
+	find mustInstanceOfRegion_class(problem,interpretation,var_a);
+	// a is exported
+	find mustInstanceOfTree_1_class(problem,interpretation,var_a);
+}
+// Must, May and Current queries for pattern queries isTree_2
+private pattern mustInRelation_pattern_queries_isTree_2(
+	problem:LogicProblem, interpretation:PartialInterpretation,
+	var_a)
+{
+	find interpretation(problem,interpretation);
+	find mustInstanceOfRegion_class(problem,interpretation,var_a);
+	// a is exported
+	find mustInstanceOfTree_2_class(problem,interpretation,var_a);
+}
+private pattern mayInRelation_pattern_queries_isTree_2(
+	problem:LogicProblem, interpretation:PartialInterpretation,
+	var_a)
+{
+	find interpretation(problem,interpretation);
+	find mayInstanceOfRegion_class(problem,interpretation,var_a);
+	// a is exported
+	find mayInstanceOfTree_2_class(problem,interpretation,var_a);
+}
+private pattern currentInRelation_pattern_queries_isTree_2(
+	problem:LogicProblem, interpretation:PartialInterpretation,
+	var_a)
+{
+	find interpretation(problem,interpretation);
+	find mustInstanceOfRegion_class(problem,interpretation,var_a);
+	// a is exported
+	find mustInstanceOfTree_2_class(problem,interpretation,var_a);
+}
+// Must, May and Current queries for pattern queries isDog
+private pattern mustInRelation_pattern_queries_isDog(
+	problem:LogicProblem, interpretation:PartialInterpretation,
+	var_a)
+{
+	find interpretation(problem,interpretation);
+	find mustInstanceOfRegion_class(problem,interpretation,var_a);
+	// a is exported
+	find mustInstanceOfDog_class(problem,interpretation,var_a);
+}
+private pattern mayInRelation_pattern_queries_isDog(
+	problem:LogicProblem, interpretation:PartialInterpretation,
+	var_a)
+{
+	find interpretation(problem,interpretation);
+	find mayInstanceOfRegion_class(problem,interpretation,var_a);
+	// a is exported
+	find mayInstanceOfDog_class(problem,interpretation,var_a);
+}
+private pattern currentInRelation_pattern_queries_isDog(
+	problem:LogicProblem, interpretation:PartialInterpretation,
+	var_a)
+{
+	find interpretation(problem,interpretation);
+	find mustInstanceOfRegion_class(problem,interpretation,var_a);
+	// a is exported
+	find mustInstanceOfDog_class(problem,interpretation,var_a);
+}
+// Must, May and Current queries for pattern queries StoryRootInside
+private pattern mustInRelation_pattern_queries_StoryRootInside(
+	problem:LogicProblem, interpretation:PartialInterpretation,
+	var_a)
+{
+	find interpretation(problem,interpretation);
+	find mustInstanceOfStoryRoot_class(problem,interpretation,var_a);
+	// a is exported
+	find mustInstanceOfStoryRoot_class(problem,interpretation,var_a);
+	find mustInRelationinsides_reference_CompositeRegion(problem,interpretation,var_a,var_virtual0);
+	find mustInstanceOfRegion_class(problem,interpretation,var_virtual0);
+	find mustEquivalent(problem, interpretation, var_virtual0, var_b);
+	neg find mayInRelation_pattern_queries_isCity(problem,interpretation,var_b);
+	neg find mayInRelation_pattern_queries_isCyberpunk(problem,interpretation,var_b);
+}
+private pattern mayInRelation_pattern_queries_StoryRootInside(
+	problem:LogicProblem, interpretation:PartialInterpretation,
+	var_a)
+{
+	find interpretation(problem,interpretation);
+	find mayInstanceOfStoryRoot_class(problem,interpretation,var_a);
+	// a is exported
+	find mayInstanceOfStoryRoot_class(problem,interpretation,var_a);
+	find mayInRelationinsides_reference_CompositeRegion(problem,interpretation,var_a,var_virtual0);
+	find mayInstanceOfRegion_class(problem,interpretation,var_virtual0);
+	find mayEquivalent(problem, interpretation, var_virtual0, var_b);
+	neg find mustInRelation_pattern_queries_isCity(problem,interpretation,var_b);
+	neg find mustInRelation_pattern_queries_isCyberpunk(problem,interpretation,var_b);
+}
+private pattern currentInRelation_pattern_queries_StoryRootInside(
+	problem:LogicProblem, interpretation:PartialInterpretation,
+	var_a)
+{
+	find interpretation(problem,interpretation);
+	find mustInstanceOfStoryRoot_class(problem,interpretation,var_a);
+	// a is exported
+	find mustInstanceOfStoryRoot_class(problem,interpretation,var_a);
+	find mustInRelationinsides_reference_CompositeRegion(problem,interpretation,var_a,var_virtual0);
+	find mustInstanceOfRegion_class(problem,interpretation,var_virtual0);
+	find mustEquivalent(problem, interpretation, var_virtual0, var_b);
+	neg find currentInRelation_pattern_queries_isCity(problem,interpretation,var_b);
+	neg find currentInRelation_pattern_queries_isCyberpunk(problem,interpretation,var_b);
+}
+// Must, May and Current queries for pattern queries CityInside
+private pattern mustInRelation_pattern_queries_CityInside(
+	problem:LogicProblem, interpretation:PartialInterpretation,
+	var_a)
+{
+	find interpretation(problem,interpretation);
+	find mustInstanceOfCity_class(problem,interpretation,var_a);
+	// a is exported
+	find mustInstanceOfCity_class(problem,interpretation,var_a);
+	find mustInRelationinsides_reference_CompositeRegion(problem,interpretation,var_a,var_virtual0);
+	find mustInstanceOfRegion_class(problem,interpretation,var_virtual0);
+	find mustEquivalent(problem, interpretation, var_virtual0, var_b);
+	neg find mayInRelation_pattern_queries_isTree_0(problem,interpretation,var_b);
+	neg find mayInRelation_pattern_queries_isTree_1(problem,interpretation,var_b);
+}
+private pattern mayInRelation_pattern_queries_CityInside(
+	problem:LogicProblem, interpretation:PartialInterpretation,
+	var_a)
+{
+	find interpretation(problem,interpretation);
+	find mayInstanceOfCity_class(problem,interpretation,var_a);
+	// a is exported
+	find mayInstanceOfCity_class(problem,interpretation,var_a);
+	find mayInRelationinsides_reference_CompositeRegion(problem,interpretation,var_a,var_virtual0);
+	find mayInstanceOfRegion_class(problem,interpretation,var_virtual0);
+	find mayEquivalent(problem, interpretation, var_virtual0, var_b);
+	neg find mustInRelation_pattern_queries_isTree_0(problem,interpretation,var_b);
+	neg find mustInRelation_pattern_queries_isTree_1(problem,interpretation,var_b);
+}
+private pattern currentInRelation_pattern_queries_CityInside(
+	problem:LogicProblem, interpretation:PartialInterpretation,
+	var_a)
+{
+	find interpretation(problem,interpretation);
+	find mustInstanceOfCity_class(problem,interpretation,var_a);
+	// a is exported
+	find mustInstanceOfCity_class(problem,interpretation,var_a);
+	find mustInRelationinsides_reference_CompositeRegion(problem,interpretation,var_a,var_virtual0);
+	find mustInstanceOfRegion_class(problem,interpretation,var_virtual0);
+	find mustEquivalent(problem, interpretation, var_virtual0, var_b);
+	neg find currentInRelation_pattern_queries_isTree_0(problem,interpretation,var_b);
+	neg find currentInRelation_pattern_queries_isTree_1(problem,interpretation,var_b);
+}
+// Must, May and Current queries for pattern queries CyberpunkInside
+private pattern mustInRelation_pattern_queries_CyberpunkInside(
+	problem:LogicProblem, interpretation:PartialInterpretation,
+	var_a)
+{
+	find interpretation(problem,interpretation);
+	find mustInstanceOfCyberpunk_class(problem,interpretation,var_a);
+	// a is exported
+	find mustInstanceOfCyberpunk_class(problem,interpretation,var_a);
+	find mustInRelationinsides_reference_CompositeRegion(problem,interpretation,var_a,var_virtual0);
+	find mustInstanceOfRegion_class(problem,interpretation,var_virtual0);
+	find mustEquivalent(problem, interpretation, var_virtual0, var_b);
+	neg find mayInRelation_pattern_queries_isTree_2(problem,interpretation,var_b);
+	neg find mayInRelation_pattern_queries_isDog(problem,interpretation,var_b);
+}
+private pattern mayInRelation_pattern_queries_CyberpunkInside(
+	problem:LogicProblem, interpretation:PartialInterpretation,
+	var_a)
+{
+	find interpretation(problem,interpretation);
+	find mayInstanceOfCyberpunk_class(problem,interpretation,var_a);
+	// a is exported
+	find mayInstanceOfCyberpunk_class(problem,interpretation,var_a);
+	find mayInRelationinsides_reference_CompositeRegion(problem,interpretation,var_a,var_virtual0);
+	find mayInstanceOfRegion_class(problem,interpretation,var_virtual0);
+	find mayEquivalent(problem, interpretation, var_virtual0, var_b);
+	neg find mustInRelation_pattern_queries_isTree_2(problem,interpretation,var_b);
+	neg find mustInRelation_pattern_queries_isDog(problem,interpretation,var_b);
+}
+private pattern currentInRelation_pattern_queries_CyberpunkInside(
+	problem:LogicProblem, interpretation:PartialInterpretation,
+	var_a)
+{
+	find interpretation(problem,interpretation);
+	find mustInstanceOfCyberpunk_class(problem,interpretation,var_a);
+	// a is exported
+	find mustInstanceOfCyberpunk_class(problem,interpretation,var_a);
+	find mustInRelationinsides_reference_CompositeRegion(problem,interpretation,var_a,var_virtual0);
+	find mustInstanceOfRegion_class(problem,interpretation,var_virtual0);
+	find mustEquivalent(problem, interpretation, var_virtual0, var_b);
+	neg find currentInRelation_pattern_queries_isTree_2(problem,interpretation,var_b);
+	neg find currentInRelation_pattern_queries_isDog(problem,interpretation,var_b);
+}
+
+//////////
+// 1.4 Containment Indexer
+//////////
+private pattern mustContains2(source: DefinedElement, target: DefinedElement) {
+	find mustContains4(_,_,source,target);
+}
+	
+private pattern mustContains4(problem:LogicProblem, interpretation:PartialInterpretation,
+	source: DefinedElement, target: DefinedElement)
+	{ find mustInRelationinsides_reference_CompositeRegion(problem,interpretation,source,target); }
+
+private pattern mustTransitiveContains(source,target) {
+	find mustContains2+(source,target);
+}
+
+//////////
+// 2. Invalidation Indexers
+//////////
+// 2.1 Invalidated by WF Queries
+//////////
+pattern invalidatedBy_pattern_queries_StoryRootInside(problem:LogicProblem, interpretation:PartialInterpretation,
+	var_a)
+{
+	find mustInRelation_pattern_queries_StoryRootInside(problem,interpretation,var_a);
+}
+pattern invalidatedBy_pattern_queries_CityInside(problem:LogicProblem, interpretation:PartialInterpretation,
+	var_a)
+{
+	find mustInRelation_pattern_queries_CityInside(problem,interpretation,var_a);
+}
+pattern invalidatedBy_pattern_queries_CyberpunkInside(problem:LogicProblem, interpretation:PartialInterpretation,
+	var_a)
+{
+	find mustInRelation_pattern_queries_CyberpunkInside(problem,interpretation,var_a);
+}
+
+//////////
+// 3. Unfinishedness Indexers
+//////////
+// 3.1 Unfinishedness Measured by Multiplicity
+//////////
+
+//////////
+// 3.2 Unfinishedness Measured by WF Queries
+//////////
+pattern unfinishedBy_pattern_queries_StoryRootInside(problem:LogicProblem, interpretation:PartialInterpretation,
+	var_a)
+{
+	find currentInRelation_pattern_queries_StoryRootInside(problem,interpretation,var_a);
+}
+pattern unfinishedBy_pattern_queries_CityInside(problem:LogicProblem, interpretation:PartialInterpretation,
+	var_a)
+{
+	find currentInRelation_pattern_queries_CityInside(problem,interpretation,var_a);
+}
+pattern unfinishedBy_pattern_queries_CyberpunkInside(problem:LogicProblem, interpretation:PartialInterpretation,
+	var_a)
+{
+	find currentInRelation_pattern_queries_CyberpunkInside(problem,interpretation,var_a);
+}
+
+//////////
+// 4. Refinement Indexers
+//////////
+// 4.1 Object constructors
+//////////
+private pattern hasElementInContainment(problem:LogicProblem, interpretation:PartialInterpretation)
+{
+	find interpretation(problem,interpretation);
+	find mustInstanceOfElementaryRegion_class(problem,interpretation,root);
+	find mustExist(problem, interpretation, root);
+}or{
+	find interpretation(problem,interpretation);
+	find mustInstanceOfTree_0_class(problem,interpretation,root);
+	find mustExist(problem, interpretation, root);
+}or{
+	find interpretation(problem,interpretation);
+	find mustInstanceOfCyberpunk_class(problem,interpretation,root);
+	find mustExist(problem, interpretation, root);
+}or{
+	find interpretation(problem,interpretation);
+	find mustInstanceOfTree_2_class(problem,interpretation,root);
+	find mustExist(problem, interpretation, root);
+}or{
+	find interpretation(problem,interpretation);
+	find mustInstanceOfCompositeRegion_class(problem,interpretation,root);
+	find mustExist(problem, interpretation, root);
+}or{
+	find interpretation(problem,interpretation);
+	find mustInstanceOfDog_class(problem,interpretation,root);
+	find mustExist(problem, interpretation, root);
+}or{
+	find interpretation(problem,interpretation);
+	find mustInstanceOfRegion_class(problem,interpretation,root);
+	find mustExist(problem, interpretation, root);
+}or{
+	find interpretation(problem,interpretation);
+	find mustInstanceOfStoryRoot_class(problem,interpretation,root);
+	find mustExist(problem, interpretation, root);
+}or{
+	find interpretation(problem,interpretation);
+	find mustInstanceOfCity_class(problem,interpretation,root);
+	find mustExist(problem, interpretation, root);
+}or{
+	find interpretation(problem,interpretation);
+	find mustInstanceOfTree_1_class(problem,interpretation,root);
+	find mustExist(problem, interpretation, root);
+}or{
+	find interpretation(problem,interpretation);
+	find mustInstanceOfStoryRoot_class_DefinedPart(problem,interpretation,root);
+	find mustExist(problem, interpretation, root);
+}or{
+	find interpretation(problem,interpretation);
+	find mustInstanceOfStoryRoot_class_UndefinedPart(problem,interpretation,root);
+	find mustExist(problem, interpretation, root);
+}or{
+	find interpretation(problem,interpretation);
+	find mustInstanceOfRegion_class_DefinedPart(problem,interpretation,root);
+	find mustExist(problem, interpretation, root);
+}or{
+	find interpretation(problem,interpretation);
+	find mustInstanceOfRegion_class_UndefinedPart(problem,interpretation,root);
+	find mustExist(problem, interpretation, root);
+}or{
+	find interpretation(problem,interpretation);
+	find mustInstanceOfCompositeRegion_class_DefinedPart(problem,interpretation,root);
+	find mustExist(problem, interpretation, root);
+}or{
+	find interpretation(problem,interpretation);
+	find mustInstanceOfCompositeRegion_class_UndefinedPart(problem,interpretation,root);
+	find mustExist(problem, interpretation, root);
+}
+pattern createObject_Dog_class_by_insides_reference_CompositeRegion(
+	problem:LogicProblem, interpretation:PartialInterpretation,
+	relationInterpretation:PartialRelationInterpretation, typeInterpretation:PartialComplexTypeInterpretation,
+	container:DefinedElement)
+{
+	find interpretation(problem,interpretation);
+	PartialInterpretation.partialtypeinterpratation(interpretation,typeInterpretation);
+	PartialComplexTypeInterpretation.interpretationOf.name(typeInterpretation,"Dog class");
+	PartialInterpretation.partialrelationinterpretation(interpretation,relationInterpretation);
+	PartialRelationInterpretation.interpretationOf.name(relationInterpretation,"insides reference CompositeRegion");
+	find mustInstanceOfCompositeRegion_class(problem,interpretation,container);
+	find mayInstanceOfDog_class(problem,interpretation,newObject);
+	find mayInRelationinsides_reference_CompositeRegion(problem,interpretation,container,newObject);
+	find mustExist(problem, interpretation, container);
+	neg find mustExist(problem, interpretation, newObject);
+}
+pattern createObject_Dog_class(
+	problem:LogicProblem, interpretation:PartialInterpretation,
+	typeInterpretation:PartialComplexTypeInterpretation)
+{
+	find interpretation(problem,interpretation);
+	neg find hasElementInContainment(problem,interpretation);
+	PartialInterpretation.partialtypeinterpratation(interpretation,typeInterpretation);
+	PartialComplexTypeInterpretation.interpretationOf.name(typeInterpretation,"Dog class");
+	find mayInstanceOfDog_class(problem,interpretation,newObject);
+	find mayExist(problem, interpretation, newObject);
+	neg find mustExist(problem, interpretation, newObject);
+}
+pattern createObject_City_class_by_insides_reference_CompositeRegion(
+	problem:LogicProblem, interpretation:PartialInterpretation,
+	relationInterpretation:PartialRelationInterpretation, typeInterpretation:PartialComplexTypeInterpretation,
+	container:DefinedElement)
+{
+	find interpretation(problem,interpretation);
+	PartialInterpretation.partialtypeinterpratation(interpretation,typeInterpretation);
+	PartialComplexTypeInterpretation.interpretationOf.name(typeInterpretation,"City class");
+	PartialInterpretation.partialrelationinterpretation(interpretation,relationInterpretation);
+	PartialRelationInterpretation.interpretationOf.name(relationInterpretation,"insides reference CompositeRegion");
+	find mustInstanceOfCompositeRegion_class(problem,interpretation,container);
+	find mayInstanceOfCity_class(problem,interpretation,newObject);
+	find mayInRelationinsides_reference_CompositeRegion(problem,interpretation,container,newObject);
+	find mustExist(problem, interpretation, container);
+	neg find mustExist(problem, interpretation, newObject);
+}
+pattern createObject_City_class(
+	problem:LogicProblem, interpretation:PartialInterpretation,
+	typeInterpretation:PartialComplexTypeInterpretation)
+{
+	find interpretation(problem,interpretation);
+	neg find hasElementInContainment(problem,interpretation);
+	PartialInterpretation.partialtypeinterpratation(interpretation,typeInterpretation);
+	PartialComplexTypeInterpretation.interpretationOf.name(typeInterpretation,"City class");
+	find mayInstanceOfCity_class(problem,interpretation,newObject);
+	find mayExist(problem, interpretation, newObject);
+	neg find mustExist(problem, interpretation, newObject);
+}
+pattern createObject_Tree_2_class_by_insides_reference_CompositeRegion(
+	problem:LogicProblem, interpretation:PartialInterpretation,
+	relationInterpretation:PartialRelationInterpretation, typeInterpretation:PartialComplexTypeInterpretation,
+	container:DefinedElement)
+{
+	find interpretation(problem,interpretation);
+	PartialInterpretation.partialtypeinterpratation(interpretation,typeInterpretation);
+	PartialComplexTypeInterpretation.interpretationOf.name(typeInterpretation,"Tree_2 class");
+	PartialInterpretation.partialrelationinterpretation(interpretation,relationInterpretation);
+	PartialRelationInterpretation.interpretationOf.name(relationInterpretation,"insides reference CompositeRegion");
+	find mustInstanceOfCompositeRegion_class(problem,interpretation,container);
+	find mayInstanceOfTree_2_class(problem,interpretation,newObject);
+	find mayInRelationinsides_reference_CompositeRegion(problem,interpretation,container,newObject);
+	find mustExist(problem, interpretation, container);
+	neg find mustExist(problem, interpretation, newObject);
+}
+pattern createObject_Tree_2_class(
+	problem:LogicProblem, interpretation:PartialInterpretation,
+	typeInterpretation:PartialComplexTypeInterpretation)
+{
+	find interpretation(problem,interpretation);
+	neg find hasElementInContainment(problem,interpretation);
+	PartialInterpretation.partialtypeinterpratation(interpretation,typeInterpretation);
+	PartialComplexTypeInterpretation.interpretationOf.name(typeInterpretation,"Tree_2 class");
+	find mayInstanceOfTree_2_class(problem,interpretation,newObject);
+	find mayExist(problem, interpretation, newObject);
+	neg find mustExist(problem, interpretation, newObject);
+}
+pattern createObject_Tree_1_class_by_insides_reference_CompositeRegion(
+	problem:LogicProblem, interpretation:PartialInterpretation,
+	relationInterpretation:PartialRelationInterpretation, typeInterpretation:PartialComplexTypeInterpretation,
+	container:DefinedElement)
+{
+	find interpretation(problem,interpretation);
+	PartialInterpretation.partialtypeinterpratation(interpretation,typeInterpretation);
+	PartialComplexTypeInterpretation.interpretationOf.name(typeInterpretation,"Tree_1 class");
+	PartialInterpretation.partialrelationinterpretation(interpretation,relationInterpretation);
+	PartialRelationInterpretation.interpretationOf.name(relationInterpretation,"insides reference CompositeRegion");
+	find mustInstanceOfCompositeRegion_class(problem,interpretation,container);
+	find mayInstanceOfTree_1_class(problem,interpretation,newObject);
+	find mayInRelationinsides_reference_CompositeRegion(problem,interpretation,container,newObject);
+	find mustExist(problem, interpretation, container);
+	neg find mustExist(problem, interpretation, newObject);
+}
+pattern createObject_Tree_1_class(
+	problem:LogicProblem, interpretation:PartialInterpretation,
+	typeInterpretation:PartialComplexTypeInterpretation)
+{
+	find interpretation(problem,interpretation);
+	neg find hasElementInContainment(problem,interpretation);
+	PartialInterpretation.partialtypeinterpratation(interpretation,typeInterpretation);
+	PartialComplexTypeInterpretation.interpretationOf.name(typeInterpretation,"Tree_1 class");
+	find mayInstanceOfTree_1_class(problem,interpretation,newObject);
+	find mayExist(problem, interpretation, newObject);
+	neg find mustExist(problem, interpretation, newObject);
+}
+pattern createObject_Cyberpunk_class_by_insides_reference_CompositeRegion(
+	problem:LogicProblem, interpretation:PartialInterpretation,
+	relationInterpretation:PartialRelationInterpretation, typeInterpretation:PartialComplexTypeInterpretation,
+	container:DefinedElement)
+{
+	find interpretation(problem,interpretation);
+	PartialInterpretation.partialtypeinterpratation(interpretation,typeInterpretation);
+	PartialComplexTypeInterpretation.interpretationOf.name(typeInterpretation,"Cyberpunk class");
+	PartialInterpretation.partialrelationinterpretation(interpretation,relationInterpretation);
+	PartialRelationInterpretation.interpretationOf.name(relationInterpretation,"insides reference CompositeRegion");
+	find mustInstanceOfCompositeRegion_class(problem,interpretation,container);
+	find mayInstanceOfCyberpunk_class(problem,interpretation,newObject);
+	find mayInRelationinsides_reference_CompositeRegion(problem,interpretation,container,newObject);
+	find mustExist(problem, interpretation, container);
+	neg find mustExist(problem, interpretation, newObject);
+}
+pattern createObject_Cyberpunk_class(
+	problem:LogicProblem, interpretation:PartialInterpretation,
+	typeInterpretation:PartialComplexTypeInterpretation)
+{
+	find interpretation(problem,interpretation);
+	neg find hasElementInContainment(problem,interpretation);
+	PartialInterpretation.partialtypeinterpratation(interpretation,typeInterpretation);
+	PartialComplexTypeInterpretation.interpretationOf.name(typeInterpretation,"Cyberpunk class");
+	find mayInstanceOfCyberpunk_class(problem,interpretation,newObject);
+	find mayExist(problem, interpretation, newObject);
+	neg find mustExist(problem, interpretation, newObject);
+}
+pattern createObject_Tree_0_class_by_insides_reference_CompositeRegion(
+	problem:LogicProblem, interpretation:PartialInterpretation,
+	relationInterpretation:PartialRelationInterpretation, typeInterpretation:PartialComplexTypeInterpretation,
+	container:DefinedElement)
+{
+	find interpretation(problem,interpretation);
+	PartialInterpretation.partialtypeinterpratation(interpretation,typeInterpretation);
+	PartialComplexTypeInterpretation.interpretationOf.name(typeInterpretation,"Tree_0 class");
+	PartialInterpretation.partialrelationinterpretation(interpretation,relationInterpretation);
+	PartialRelationInterpretation.interpretationOf.name(relationInterpretation,"insides reference CompositeRegion");
+	find mustInstanceOfCompositeRegion_class(problem,interpretation,container);
+	find mayInstanceOfTree_0_class(problem,interpretation,newObject);
+	find mayInRelationinsides_reference_CompositeRegion(problem,interpretation,container,newObject);
+	find mustExist(problem, interpretation, container);
+	neg find mustExist(problem, interpretation, newObject);
+}
+pattern createObject_Tree_0_class(
+	problem:LogicProblem, interpretation:PartialInterpretation,
+	typeInterpretation:PartialComplexTypeInterpretation)
+{
+	find interpretation(problem,interpretation);
+	neg find hasElementInContainment(problem,interpretation);
+	PartialInterpretation.partialtypeinterpratation(interpretation,typeInterpretation);
+	PartialComplexTypeInterpretation.interpretationOf.name(typeInterpretation,"Tree_0 class");
+	find mayInstanceOfTree_0_class(problem,interpretation,newObject);
+	find mayExist(problem, interpretation, newObject);
+	neg find mustExist(problem, interpretation, newObject);
+}
+pattern createObject_StoryRoot_class_UndefinedPart_by_insides_reference_CompositeRegion(
+	problem:LogicProblem, interpretation:PartialInterpretation,
+	relationInterpretation:PartialRelationInterpretation, typeInterpretation:PartialComplexTypeInterpretation,
+	container:DefinedElement)
+{
+	find interpretation(problem,interpretation);
+	PartialInterpretation.partialtypeinterpratation(interpretation,typeInterpretation);
+	PartialComplexTypeInterpretation.interpretationOf.name(typeInterpretation,"StoryRoot class UndefinedPart");
+	PartialInterpretation.partialrelationinterpretation(interpretation,relationInterpretation);
+	PartialRelationInterpretation.interpretationOf.name(relationInterpretation,"insides reference CompositeRegion");
+	find mustInstanceOfCompositeRegion_class(problem,interpretation,container);
+	find mayInstanceOfStoryRoot_class_UndefinedPart(problem,interpretation,newObject);
+	find mayInRelationinsides_reference_CompositeRegion(problem,interpretation,container,newObject);
+	find mustExist(problem, interpretation, container);
+	neg find mustExist(problem, interpretation, newObject);
+}
+pattern createObject_StoryRoot_class_UndefinedPart(
+	problem:LogicProblem, interpretation:PartialInterpretation,
+	typeInterpretation:PartialComplexTypeInterpretation)
+{
+	find interpretation(problem,interpretation);
+	neg find hasElementInContainment(problem,interpretation);
+	PartialInterpretation.partialtypeinterpratation(interpretation,typeInterpretation);
+	PartialComplexTypeInterpretation.interpretationOf.name(typeInterpretation,"StoryRoot class UndefinedPart");
+	find mayInstanceOfStoryRoot_class_UndefinedPart(problem,interpretation,newObject);
+	find mayExist(problem, interpretation, newObject);
+	neg find mustExist(problem, interpretation, newObject);
+}
+
+//////////
+// 4.2 Type refinement
+//////////
+pattern refineTypeTo_Dog_class(problem:LogicProblem, interpretation:PartialInterpretation, element: DefinedElement) {
+	find interpretation(problem,interpretation);
+	PartialInterpretation.newElements(interpretation,element);
+	find mayInstanceOfDog_class(problem,interpretation,element);
+	neg find mustInstanceOfDog_class(problem,interpretation,element);
+	neg find mustInstanceOfTree_2_class(problem,interpretation,element);
+	neg find mustInstanceOfTree_1_class(problem,interpretation,element);
+	neg find mustInstanceOfCompositeRegion_class(problem,interpretation,element);
+	neg find mustInstanceOfTree_0_class(problem,interpretation,element);
+}
+pattern refineTypeTo_City_class(problem:LogicProblem, interpretation:PartialInterpretation, element: DefinedElement) {
+	find interpretation(problem,interpretation);
+	PartialInterpretation.newElements(interpretation,element);
+	find mayInstanceOfCity_class(problem,interpretation,element);
+	neg find mustInstanceOfCity_class(problem,interpretation,element);
+	neg find mustInstanceOfStoryRoot_class(problem,interpretation,element);
+	neg find mustInstanceOfElementaryRegion_class(problem,interpretation,element);
+	neg find mustInstanceOfCyberpunk_class(problem,interpretation,element);
+}
+pattern refineTypeTo_Tree_2_class(problem:LogicProblem, interpretation:PartialInterpretation, element: DefinedElement) {
+	find interpretation(problem,interpretation);
+	PartialInterpretation.newElements(interpretation,element);
+	find mayInstanceOfTree_2_class(problem,interpretation,element);
+	neg find mustInstanceOfDog_class(problem,interpretation,element);
+	neg find mustInstanceOfTree_2_class(problem,interpretation,element);
+	neg find mustInstanceOfTree_1_class(problem,interpretation,element);
+	neg find mustInstanceOfCompositeRegion_class(problem,interpretation,element);
+	neg find mustInstanceOfTree_0_class(problem,interpretation,element);
+}
+pattern refineTypeTo_Tree_1_class(problem:LogicProblem, interpretation:PartialInterpretation, element: DefinedElement) {
+	find interpretation(problem,interpretation);
+	PartialInterpretation.newElements(interpretation,element);
+	find mayInstanceOfTree_1_class(problem,interpretation,element);
+	neg find mustInstanceOfDog_class(problem,interpretation,element);
+	neg find mustInstanceOfTree_2_class(problem,interpretation,element);
+	neg find mustInstanceOfTree_1_class(problem,interpretation,element);
+	neg find mustInstanceOfCompositeRegion_class(problem,interpretation,element);
+	neg find mustInstanceOfTree_0_class(problem,interpretation,element);
+}
+pattern refineTypeTo_Cyberpunk_class(problem:LogicProblem, interpretation:PartialInterpretation, element: DefinedElement) {
+	find interpretation(problem,interpretation);
+	PartialInterpretation.newElements(interpretation,element);
+	find mayInstanceOfCyberpunk_class(problem,interpretation,element);
+	neg find mustInstanceOfCity_class(problem,interpretation,element);
+	neg find mustInstanceOfStoryRoot_class(problem,interpretation,element);
+	neg find mustInstanceOfElementaryRegion_class(problem,interpretation,element);
+	neg find mustInstanceOfCyberpunk_class(problem,interpretation,element);
+}
+pattern refineTypeTo_Tree_0_class(problem:LogicProblem, interpretation:PartialInterpretation, element: DefinedElement) {
+	find interpretation(problem,interpretation);
+	PartialInterpretation.newElements(interpretation,element);
+	find mayInstanceOfTree_0_class(problem,interpretation,element);
+	neg find mustInstanceOfDog_class(problem,interpretation,element);
+	neg find mustInstanceOfTree_1_class(problem,interpretation,element);
+	neg find mustInstanceOfTree_2_class(problem,interpretation,element);
+	neg find mustInstanceOfCompositeRegion_class(problem,interpretation,element);
+	neg find mustInstanceOfTree_0_class(problem,interpretation,element);
+}
+pattern refineTypeTo_StoryRoot_class_UndefinedPart(problem:LogicProblem, interpretation:PartialInterpretation, element: DefinedElement) {
+	find interpretation(problem,interpretation);
+	PartialInterpretation.newElements(interpretation,element);
+	find mayInstanceOfStoryRoot_class_UndefinedPart(problem,interpretation,element);
+	neg find mustInstanceOfCity_class(problem,interpretation,element);
+	neg find mustInstanceOfElementaryRegion_class(problem,interpretation,element);
+	neg find mustInstanceOfCyberpunk_class(problem,interpretation,element);
+	neg find mustInstanceOfStoryRoot_class_UndefinedPart(problem,interpretation,element);
+}
+
+//////////
+// 4.3 Relation refinement
+//////////
+pattern refineRelation_next_reference_Region_and_next_reference_Region(
+	problem:LogicProblem, interpretation:PartialInterpretation,
+	relationIterpretation:PartialRelationInterpretation, oppositeInterpretation:PartialRelationInterpretation,
+	from: DefinedElement, to: DefinedElement)
+{
+	find interpretation(problem,interpretation);
+	PartialInterpretation.partialrelationinterpretation(interpretation,relationIterpretation);
+	PartialRelationInterpretation.interpretationOf.name(relationIterpretation,"next reference Region");
+	PartialInterpretation.partialrelationinterpretation(interpretation,oppositeInterpretation);
+	PartialRelationInterpretation.interpretationOf.name(oppositeInterpretation,"next reference Region");
+	find mustExist(problem, interpretation, from);
+	find mustExist(problem, interpretation, to);
+	find mustInstanceOfRegion_class(problem,interpretation,from);
+	find mustInstanceOfRegion_class(problem,interpretation,to);
+	find mayInRelationnext_reference_Region(problem,interpretation,from,to);
+	neg find mustInRelationnext_reference_Region(problem,interpretation,from,to);
+}
+
