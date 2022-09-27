@@ -1,0 +1,48 @@
+version: '3.0'
+
+services:
+
+  #region Commented out example docker compose files
+  # quotes:
+  #   build:
+  #     context: ./QuoteService
+  #     dockerfile: app.dockerfile => By default, docker will try to find a file named "Dockerfile" in the context folder. So it's fine to not include this params
+  # api:
+  #   build:
+  #     context: ./ApiGateway
+  #     dockerfile: app.dockerfile 
+  #   environment:
+  #     - "QUOTES_API=http://quotes:5000"
+  #   depends_on:
+  #     - quotes
+  #   ports:
+  #     - "3000:3000"
+  # frontend:
+  #   build:
+  #     context: ./FrontendApplication
+  #     dockerfile: app.dockerfile
+  #   ports:
+  #     - "8080:80"
+  #endregion
+
+  #region Docker compose for specifically implemented services
+  frontend:
+    build:
+      context: ./Frontend 
+  tokenization:
+    build:
+      context: ./Tokenization
+  #endregion 
+
+  #region Common services
+  nginx:
+    build: ./nginx
+    ports:
+      - '80:80'
+    depends_on:
+      - frontend
+      - tokenization
+  webhook:
+    restart: on-failure
+    build: ./webhook
+  #endregion
