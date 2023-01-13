@@ -7,16 +7,6 @@ services:
   #   build:
   #     context: ./QuoteService
   #     dockerfile: app.dockerfile => By default, docker will try to find a file named "Dockerfile" in the context folder. So it's fine to not include this params
-  # api:
-  #   build:
-  #     context: ./ApiGateway
-  #     dockerfile: app.dockerfile 
-  #   environment:
-  #     - "QUOTES_API=http://quotes:5000"
-  #   depends_on:
-  #     - quotes
-  #   ports:
-  #     - "3000:3000"
   # frontend:
   #   build:
   #     context: ./FrontendApplication
@@ -28,21 +18,36 @@ services:
   #region Docker compose for specifically implemented services
   frontend:
     build:
-      context: ./Frontend 
-  tokenization:
+      context: ./FrontendApplication
+    ports:
+      - "8080:8080"
+  preprocessing:
     build:
-      context: ./Tokenization
+      context: ./Preprocessing
+    environment:
+      - "PYTHONUNBUFFERED=1"
   #endregion 
 
   #region Common services
-  nginx:
+  nginx: # External
     build: ./nginx
     ports:
       - '80:80'
     depends_on:
       - frontend
-      - tokenization
-  webhook:
-    restart: on-failure
-    build: ./webhook
+      # - preprocessing
+  api: # Internal
+    build:
+      context: ./ApiGateway
+      dockerfile: app.dockerfile 
+    environment:
+      - "FRONTEND_API=http://frontend:8080"
+      - "PREPROCESSING_API=http://preprocessing:5000"
+    depends_on:
+      - preprocessing
+    ports:
+      - "3000:3000"
+  # webhook:
+  #   restart: on-failure
+  #   build: ./webhook
   #endregion
