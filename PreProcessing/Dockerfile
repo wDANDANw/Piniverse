@@ -13,6 +13,9 @@ COPY . /usr/src/app
 # Install all dependencies
 RUN pip install -r requirements.txt
 
+# Spacy
+RUN python3 -m spacy download en_core_web_sm
+
 # Expose the port
 EXPOSE 5000
 

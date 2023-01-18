@@ -40,10 +40,7 @@ app.post('/api/resolve_entity', async (req, res) => {
     try {
         const url = PREPROCESSING_API_GATEWAY + '/api/resolve_entity'
         const data = req.body
-        console.log(data)
         const resolved = await axios.post(url, data)
-
-        console.log(resolved.data)
 
         return res.json({
             time: Date.now(),
@@ -57,9 +54,34 @@ app.post('/api/resolve_entity', async (req, res) => {
             message: "Internal server error",
         })
     }
-    
-
 })
+
+// Demo
+app.post('/api/resolve_ner', async (req, res) => {
+    try {
+        // TODO: Make this a middleware
+        console.log("Callling /api/resolve_ner")
+
+        const url = PREPROCESSING_API_GATEWAY + '/api/resolve_ner'
+        const data = req.body
+        const resolved = await axios.post(url, data)
+
+        console.log(resolved)
+
+        return res.json({
+            time: Date.now(),
+            input: resolved.data.input,
+            output: resolved.data.output
+        })
+    } catch (error) {
+        // console.log(error)
+        res.status(500)
+        return res.json({
+            message: "Internal server error",
+        })
+    }
+})
+
 
 
 

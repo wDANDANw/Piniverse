@@ -14,6 +14,7 @@
           <v-textarea
               name="input-7-1"
               label="Input"
+              v-model="input_str"
           ></v-textarea>
           <v-btn
               block
@@ -21,8 +22,11 @@
               outlined
               rounded
               class="mt-5"
+              @click="demo_generate"
           >Generate
           </v-btn>
+          {{"TODO: Make this output prettier"}}
+          <h3 > Output: {{output_str}} </h3> 
           <v-btn
               block
               elevation="2"
@@ -67,9 +71,12 @@
 
 <script setup>
 import { vue3dLoader } from "vue-3d-loader";
+
 </script>
 
 <script>
+import axios from "axios"
+const api_gateway = 'http://localhost:3000' // Hardcoded, should use EnvironmentPlugin(['API_GATEWAY'])
 
  export default {
 
@@ -78,6 +85,8 @@ import { vue3dLoader } from "vue-3d-loader";
      return {
        filePath: ['model/teat.dae'],
        files: [],
+       input_str: "",
+       output_str: ""
      }
    },
    methods: {
@@ -91,8 +100,15 @@ import { vue3dLoader } from "vue-3d-loader";
          this.filePath = [temp];
          console.log(this.filePath)
        }
-
-     }
-   }
+     },
+      
+    async demo_generate() {
+      this.output_str = "Generating ..."
+      const resolver_api = "/api/resolve_ner" 
+      const url = api_gateway + resolver_api
+      let vm = this
+      await axios.post(url, {input_str: vm.input_str}).then((res) => vm.output_str = JSON.stringify(res.data))
+    }
+  }
  }
 </script>
