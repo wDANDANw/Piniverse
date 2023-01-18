@@ -26,7 +26,7 @@
           >Generate
           </v-btn>
           {{"TODO: Make this output prettier"}}
-          <h3 > Output: {{output_str}} </h3> 
+          <h3 > Output: {{output_str}} </h3>
           <v-btn
               block
               elevation="2"
@@ -35,27 +35,25 @@
               class="mt-5"
           >Clear
           </v-btn>
-          <v-btn
-              block
-              elevation="2"
-              outlined
-              rounded
-              class="mt-5"
-              @click="previewFiles"
-              type="file" id="file" ref="myFiles" accept=".obj"
-          >Select Model File
 
-          </v-btn>
-          <input type="file" id="file" ref="myFiles" class="custom-file-input" accept=".obj"
-                 @change="previewFiles" multiple>
-        </v-col>
-        <v-col
-            cols="12"
-            md="6"
-        >
+          <v-file-input
+              label="Manual Upload Model Files"
+              type="file"
+              id="file"
+              ref="myFiles"
+              class="custom-file-input"
+              accept=".obj"
+              @change="previewFiles"
+              multiple="true"
+          ></v-file-input>
         </v-col>
 
       </v-container>
+<!--      This is the 3D model viewer-->
+<!--          Support: obj, dae, json...-->
+<!--          Left mouse to rotate-->
+<!--          Right mouse to move-->
+<!--          Scroll to zoom in/out-->
       <vue3dLoader
           id="viewer"
           ref="myViewer"
@@ -70,7 +68,7 @@
 
 
 <script setup>
-import { vue3dLoader } from "vue-3d-loader";
+import {vue3dLoader} from "vue-3d-loader";
 
 </script>
 
@@ -101,10 +99,10 @@ const api_gateway = 'http://localhost:3000' // Hardcoded, should use Environment
          console.log(this.filePath)
        }
      },
-      
+
     async demo_generate() {
       this.output_str = "Generating ..."
-      const resolver_api = "/api/resolve_ner" 
+      const resolver_api = "/api/resolve_ner"
       const url = api_gateway + resolver_api
       let vm = this
       await axios.post(url, {input_str: vm.input_str}).then((res) => vm.output_str = JSON.stringify(res.data))

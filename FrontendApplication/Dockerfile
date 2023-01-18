@@ -1,21 +1,23 @@
-# Example dockerfile from nodejs https://nodejs.org/en/docs/guides/nodejs-docker-webapp/
-
+# Choose the Image which has Node installed already
 FROM node:16
 
-# Create app directory
-WORKDIR /usr/src/app
+# install simple http server for serving static content
+RUN npm install -g http-server
 
-# Install app dependencies
-# A wildcard is used to ensure both package.json AND package-lock.json are copied
-# where available (npm@5+)
+# make the 'app' folder the current working directory
+WORKDIR /src
+
+# copy both 'package.json' and 'package-lock.json' (if available)
 COPY package*.json ./
 
+# install project dependencies
 RUN npm install
-# If you are building your code for production
-# RUN npm ci --only=production
 
-# Bundle app source
+# copy project files and folders to the current working directory (i.e. 'app' folder)
 COPY . .
 
+# build app for production with minification
+RUN npm run build
+
 EXPOSE 8080
-CMD [ "npm", "run", "serve"]
+CMD [ "http-server", "dist" ]
