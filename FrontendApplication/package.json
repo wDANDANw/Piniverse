@@ -11,10 +11,11 @@
     "@mdi/font": "5.9.55",
     "axios": "^1.2.2",
     "core-js": "^3.8.3",
+    "depcheck": "^1.4.3",
+    "pinia": "^2.0.29",
     "roboto-fontface": "*",
-    "troisjs": "^0.3.4",
+    "three": "^0.148.0",
     "vue": "^3.2.13",
-    "vue-3d-loader": "^2.1.4",
     "vuetify": "^3.0.0-beta.0",
     "webfontloader": "^1.0.0"
   },

@@ -35,50 +35,51 @@
               class="mt-5"
           >Clear
           </v-btn>
+          <v-btn
+              block
+              elevation="2"
+              outlined
+              rounded
+              class="mt-5"
+              @click="previewFiles"
+              type="file" id="file" ref="myFiles" accept=".obj"
+          >Select Model File
 
-          <v-file-input
-              label="Manual Upload Model Files"
-              type="file"
-              id="file"
-              ref="myFiles"
-              class="custom-file-input"
-              accept=".obj"
-              @change="previewFiles"
-              multiple="true"
-          ></v-file-input>
+          </v-btn>
+          <input type="file" id="file" ref="myFiles" class="custom-file-input" accept=".obj"
+                 @change="previewFiles" multiple>
+        </v-col>
+        <v-col
+            cols="12"
+            md="6"
+        >
         </v-col>
 
       </v-container>
-<!--      This is the 3D model viewer-->
-<!--          Support: obj, dae, json...-->
-<!--          Left mouse to rotate-->
-<!--          Right mouse to move-->
-<!--          Scroll to zoom in/out-->
-      <vue3dLoader
-          id="viewer"
-          ref="myViewer"
-          :filePath="filePath"
-          :cameraPosition="{ x: 1, y: -5, z: -20 }"
-          :height="350"
-      />
+      <v-container>
+        <viewport></viewport>
+        <panel></panel>
+      </v-container>
+
     </v-main>
   </v-app>
 
 </template>
 
-
-<script setup>
-import {vue3dLoader} from "vue-3d-loader";
-
-</script>
-
 <script>
 import axios from "axios"
 const api_gateway = 'http://localhost:3000' // Hardcoded, should use EnvironmentPlugin(['API_GATEWAY'])
 
+import viewPort from "@/components/ViewPort.vue";
+import controlPanel from "@/components/ControlPanel.vue";
+
  export default {
 
    name: 'App',
+   components: {
+     viewport: viewPort,
+     panel: controlPanel,
+   },
    data() {
      return {
        filePath: ['model/teat.dae'],
@@ -110,3 +111,21 @@ const api_gateway = 'http://localhost:3000' // Hardcoded, should use Environment
   }
  }
 </script>
+
+<style scoped>
+html,
+body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+body {
+  margin: 0px;
+}
+canvas {
+  position: relative;
+}
+#app {
+  height: 100%;
+}
+</style>
