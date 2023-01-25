@@ -62,14 +62,16 @@
               multiple="true"
               style="font-family: 'Comic Sans MS', serif"
           ></v-file-input>
-          <vue3dLoader
-              backgroundAlpha="0.3"
-              id="viewer"
-              ref="myViewer"
-              :filePath="filePath"
-              :cameraPosition="{ x: 1, y: -5, z: -20 }"
-              :height="350"
-          />
+<!--          <vue3dLoader-->
+<!--              backgroundAlpha="0.3"-->
+<!--              id="viewer"-->
+<!--              ref="myViewer"-->
+<!--              :filePath="filePath"-->
+<!--              :cameraPosition="{ x: 1, y: -5, z: -20 }"-->
+<!--              :height="350"-->
+<!--          />-->
+          <viewport></viewport>
+          <panel></panel>
         </v-col>
       </v-row>
     </v-col>
@@ -88,9 +90,16 @@ import {vue3dLoader} from "vue-3d-loader";
 import axios from "axios"
 const api_gateway = 'http://localhost:3000' // Hardcoded, should use EnvironmentPlugin(['API_GATEWAY'])
 
+import viewPort from "@/components/ViewPort.vue";
+import controlPanel from "@/components/ControlPanel.vue";
+
  export default {
 
    name: 'App',
+   components: {
+     viewport: viewPort,
+     panel: controlPanel,
+   },
    data() {
      return {
        filePath: ['model/teat.dae'],
@@ -126,3 +135,21 @@ const api_gateway = 'http://localhost:3000' // Hardcoded, should use Environment
   }
  }
 </script>
+
+<style scoped>
+html,
+body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+body {
+  margin: 0px;
+}
+canvas {
+  position: relative;
+}
+#app {
+  height: 100%;
+}
+</style>
