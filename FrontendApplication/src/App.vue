@@ -1,55 +1,19 @@
 
 <template>
-  <v-app id="inspire" align="center" style="background: #FFCCCC">
+  <v-app id="inspire" align="center" style="background: #EACECE">
     <v-main>
 <!--      align="center" style="background: #CCFFFF" cols="11"-->
     <v-col md="11">
 <!--      Top of the page-->
-      <v-col align="center" style="background: #CCFFFF" class="rounded-xl mb-4">
+      <v-col align="center" style="background: #E6E6FA" class="rounded-xl mb-4">
         <v-toolbar-title style="font-size: 30px; font-family: 'Comic Sans MS',serif">Game Creation Engine</v-toolbar-title>
       </v-col>
 
       <v-row class="pa-4">
 <!--        Left side of the page-->
-        <v-col style="background: #CCFFFF" class="rounded-xl mr-2">
-          <v-toolbar-title style="font-size: 20px; font-family: 'Comic Sans MS',serif">Parameters</v-toolbar-title>
-          <v-textarea
-              name="input"
-              label="Input"
-              v-model="input_str"
-              style="font-family: 'Comic Sans MS', serif"
-          ></v-textarea>
-          <v-btn
-              block
-              elevation="2"
-              outlined
-              rounded
-              class="mt-5"
-              @click="demo_generate"
-              style="font-family: 'Comic Sans MS', serif"
-          >Generate
-          </v-btn>
-          <v-btn
-              block
-              elevation="2"
-              outlined
-              rounded
-              class="mt-5"
-              style="font-family: 'Comic Sans MS', serif"
-              @click="clearFields"
-          >Clear
-          </v-btn>
-          <v-textarea
-              ref = "OutputBox"
-              name="output"
-              v-model="output_str"
-              class="mt-5"
-              readonly
-              style="font-family: 'Comic Sans MS', serif"
-          ></v-textarea>
-        </v-col>
+        <ParameterPanel></ParameterPanel>
 <!--        Right side of the page-->
-        <v-col style="background: #CCFFFF" class="rounded-xl ml-2">
+        <v-col style="background: #E6E6FA" class="rounded-xl ml-2">
           <v-toolbar-title style="font-size: 20px; font-family: 'Comic Sans MS',serif">3D Viewer</v-toolbar-title>
           <v-file-input
               label="Manual Upload Model Files"
@@ -62,50 +26,81 @@
               multiple="true"
               style="font-family: 'Comic Sans MS', serif"
           ></v-file-input>
-<!--          <vue3dLoader-->
-<!--              backgroundAlpha="0.3"-->
-<!--              id="viewer"-->
-<!--              ref="myViewer"-->
-<!--              :filePath="filePath"-->
-<!--              :cameraPosition="{ x: 1, y: -5, z: -20 }"-->
-<!--              :height="350"-->
-<!--          />-->
-          <viewport></viewport>
-          <panel></panel>
+          <viewport class="view">
+
+          </viewport>
+            <div class="options" align="right">
+              <v-menu
+                  v-model="menu"
+                  :close-on-content-click="false"
+                  location="end"
+                  align="center">
+                <template v-slot:activator="{ props }">
+                  <v-btn
+                      color="indigo"
+                      v-bind="props"
+                      icon
+                  >
+                    <v-icon>
+                      mdi-cog
+                    </v-icon>
+
+                  </v-btn>
+                </template>
+                    <panel></panel>
+              </v-menu>
+            </div>
+<!--          TODO: DO NOT DELETE THE FOLLOWING COMMENTS!!!!-->
+<!--          <v-expansion-panels>-->
+<!--            <v-expansion-panel>-->
+<!--              <v-expansion-panel-title>-->
+<!--                Options-->
+<!--              </v-expansion-panel-title>-->
+<!--              <v-expansion-panel-text>-->
+<!--                <panel></panel>-->
+<!--              </v-expansion-panel-text>-->
+<!--            </v-expansion-panel>-->
+<!--          </v-expansion-panels>-->
+
         </v-col>
+
       </v-row>
+
+
     </v-col>
     </v-main>
   </v-app>
 
+
+
+
 </template>
 
 
-<script setup>
-import {vue3dLoader} from "vue-3d-loader";
-
-</script>
 
 <script>
-import axios from "axios"
-const api_gateway = 'http://localhost:3000' // Hardcoded, should use EnvironmentPlugin(['API_GATEWAY'])
 
 import viewPort from "@/components/ViewPort.vue";
 import controlPanel from "@/components/ControlPanel.vue";
+import ParameterPanel from "@/components/ParameterPanel";
 
  export default {
 
    name: 'App',
    components: {
+     ParameterPanel,
      viewport: viewPort,
      panel: controlPanel,
    },
    data() {
      return {
-       filePath: ['model/teat.dae'],
+       filePath: ['model/test.dae'],
        files: [],
-       input_str: "",
-       output_str: ""
+       dialog: false,
+       fav: true,
+       menu: false,
+       message: false,
+       hints: true,
      }
    },
    methods: {
@@ -120,18 +115,6 @@ import controlPanel from "@/components/ControlPanel.vue";
          console.log(this.filePath)
        }
      },
-     clearFields(){
-       this.input_str = "";
-       this.output_str = "";
-     },
-
-    async demo_generate() {
-      this.output_str = "Generating ...";
-      const resolver_api = "/api/resolve_ner";
-      const url = api_gateway + resolver_api;
-      let vm = this;
-      await axios.post(url, {input_str: vm.input_str}).then((res) => vm.output_str = JSON.stringify(res.data));
-    }
   }
  }
 </script>
@@ -152,4 +135,22 @@ canvas {
 #app {
   height: 100%;
 }
+
+.options{
+  margin-top: -5rem;
+  margin-right: 0.5rem;
+}
+
+.view{
+  margin-bottom: 2rem;
+}
 </style>
+
+<!--          <vue3dLoader-->
+<!--              backgroundAlpha="0.3"-->
+<!--              id="viewer"-->
+<!--              ref="myViewer"-->
+<!--              :filePath="filePath"-->
+<!--              :cameraPosition="{ x: 1, y: -5, z: -20 }"-->
+<!--              :height="350"-->
+<!--          />-->

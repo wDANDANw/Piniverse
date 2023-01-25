@@ -27,9 +27,3 @@ onMounted(() => {
   <div class="viewport" ref="viewport"></div>
 </template>
 
-<style>
-.viewport {
-  height: 100%;
-  width: 100%;
-}
-</style>

@@ -1,98 +1,179 @@
-<script setup>
-import { useViewportStore } from "@/stores/viewport";
-const store = useViewportStore();
-let axisLinesVisible = true;
-let pyramidsVisible = true;
-function togglePyramids() {
-  if (pyramidsVisible) {
-    store.HIDE_PYRAMIDS();
-    pyramidsVisible = false;
-  } else {
-    store.SHOW_PYRAMIDS();
-    pyramidsVisible = true;
+<!--<script setup>-->
+
+<!--const store = useViewportStore();-->
+<!--let axisLinesVisible = true;-->
+<!--let pyramidsVisible = true;-->
+<!--function togglePyramids() {-->
+<!--  if (pyramidsVisible) {-->
+<!--    store.HIDE_PYRAMIDS();-->
+<!--    pyramidsVisible = false;-->
+<!--  } else {-->
+<!--    store.SHOW_PYRAMIDS();-->
+<!--    pyramidsVisible = true;-->
+<!--  }-->
+<!--}-->
+<!--function toggleAxisLines() {-->
+<!--  if (axisLinesVisible) {-->
+<!--    store.HIDE_AXIS_LINES();-->
+<!--    axisLinesVisible = false;-->
+<!--  } else {-->
+<!--    store.SHOW_AXIS_LINES();-->
+<!--    axisLinesVisible = true;-->
+<!--  }-->
+<!--}-->
+<!--function resetCameraPosition() {-->
+<!--  store.SET_CAMERA_POSITION(0, 0, 500);-->
+<!--  store.RESET_CAMERA_ROTATION();-->
+<!--}-->
+<!--</script>-->
+
+<template>
+
+  <v-card>
+    <v-card-text>
+
+      <div class="checkbox">
+        <v-checkbox
+            label="pyramid"
+            dense
+            v-model="pyramidsVisible"
+            @click="togglePyramids">
+        </v-checkbox>
+      </div>
+
+      <div class="checkbox">
+        <v-checkbox
+            label="axis-lines"
+            v-model="axisLinesVisible"
+            @click="toggleAxisLines">
+        </v-checkbox>
+      </div>
+
+      <br>
+      <br>
+      <div class="camera">Camera Position</div>
+
+      <div class="text">
+        X: <span>{{ store.CAMERA_POSITION.x }}</span>
+      </div>
+
+      <div class="text">
+        Y: <span>{{ store.CAMERA_POSITION.y }}</span>
+      </div>
+
+      <div class="text">
+        Z: <span>{{ store.CAMERA_POSITION.z }}</span>
+      </div>
+
+      <br>
+
+      <div class="buttons">
+        <v-btn
+            @click="resetCameraPosition"
+        >
+          Reset Camera
+        </v-btn>
+      </div>
+
+      <v-container class="icons">
+        <v-row>
+          <v-col>
+            <v-btn
+                href="https://github.com/SRLabs/Vue-Three-Demo"
+                target="_blank"
+                class="links"
+                icon>
+              <v-icon>
+                mdi-github
+              </v-icon>
+            </v-btn>
+          </v-col>
+          <v-col>
+            <v-btn
+                href="https://threejs.org/examples/?q=controls#misc_controls_trackball"
+                target="_blank"
+                class="links"
+                icon>
+              <v-icon>
+                mdi-backup-restore
+              </v-icon>
+            </v-btn>
+          </v-col>
+        </v-row>
+      </v-container>
+
+    </v-card-text>
+  </v-card>
+</template>
+
+<script>
+import * as viewport from "@/stores/viewport";
+export default {
+  name: 'ControlPanel',
+  data() {
+    return {
+      store: viewport.useViewportStore(),
+      axisLinesVisible: true,
+      pyramidsVisible: true,
+    }
+  },
+  methods: {
+    togglePyramids() {
+      if (this.pyramidsVisible) {
+        this.store.HIDE_PYRAMIDS();
+        this.pyramidsVisible = false;
+      } else {
+        this.store.SHOW_PYRAMIDS();
+        this.pyramidsVisible = true;
+      }
+    },
+    toggleAxisLines() {
+      if (this.axisLinesVisible) {
+        this.store.HIDE_AXIS_LINES();
+        this.axisLinesVisible = false;
+      } else {
+        this.store.SHOW_AXIS_LINES();
+        this.axisLinesVisible = true;
+      }
+    },
+    resetCameraPosition() {
+      this.store.SET_CAMERA_POSITION(0, 0, 500);
+      this.store.RESET_CAMERA_ROTATION();
+    }
   }
-}
-function toggleAxisLines() {
-  if (axisLinesVisible) {
-    store.HIDE_AXIS_LINES();
-    axisLinesVisible = false;
-  } else {
-    store.SHOW_AXIS_LINES();
-    axisLinesVisible = true;
-  }
-}
-function resetCameraPosition() {
-  store.SET_CAMERA_POSITION(0, 0, 500);
-  store.RESET_CAMERA_ROTATION();
 }
 </script>
 
-<template>
-  <div
-      class="flex flex-col absolute w-64 h-auto text-white rounded-md mr-2 mb-2 z-10 border border-gray-700 bottom-0 right-0"
-  >
-    <div class="p-2 border-b border-gray-700 bg-gray-400">Controls</div>
-    <div class="h-full rounded-b flex flex-col bg-white">
-      <!-- Toggles -->
-      <div class="border-b border-gray-700 p-2">
-        <p class="mb-1 text-gray-600 font-bold">Scenery</p>
-        <p class="flex items-center justify-between text-gray-500">
-          Pyramids
-          <input
-              type="checkbox"
-              name="pyramids"
-              id="pyramids"
-              v-model="pyramidsVisible"
-              @click="togglePyramids"
-          />
-        </p>
-        <p class="flex items-center justify-between text-gray-500">
-          Axis Lines
-          <input
-              type="checkbox"
-              name="axis-lines"
-              id="axis-lines"
-              v-model="axisLinesVisible"
-              @click="toggleAxisLines"
-          />
-        </p>
-      </div>
-      <!-- Camera Position -->
-      <div v-if="store.CAMERA_POSITION" class="p-2 border-b border-gray-700">
-        <p class="mb-1 text-gray-600 font-bold">Camera Position</p>
-        <p class="flex justify-between w-full mb-2 text-gray-500">
-          X: <span>{{ store.CAMERA_POSITION.x }}</span>
-        </p>
-        <p class="flex justify-between w-full mb-2 text-gray-500">
-          Y: <span>{{ store.CAMERA_POSITION.y }}</span>
-        </p>
-        <p class="flex justify-between w-full mb-2 text-gray-500">
-          Z: <span>{{ store.CAMERA_POSITION.z }}</span>
-        </p>
-        <p class="flex items-center">
-          <button
-              class="bg-gray-300 text-gray-600 cursor-pointer shadow p-2 mx-auto"
-              @click="resetCameraPosition"
-          >
-            Reset Camera
-          </button>
-        </p>
-      </div>
-      <!-- Links -->
-      <div class="flex justify-around">
-        <a
-            href="https://threejs.org/examples/?q=controls#misc_controls_trackball"
-            target="_blank"
-            class="text-gray-600 no-underline hover:text-gray-500 w-1/2 text-center p-2"
-        >Original &#8599;
-        </a>
-        <a
-            href="https://github.com/SRLabs/Vue-Three-Demo"
-            target="_blank"
-            class="text-gray-600 no-underline hover:text-gray-500 w-1/2 text-center p-2"
-        >Github &#8599;
-        </a>
-      </div>
-    </div>
-  </div>
-</template>
+<style>
+.checkbox{
+  margin-top: -1rem;
+  margin-bottom: -3rem;
+  color: #7b34e6;
+}
+
+.text{
+  text-align: left;
+  font-size: 15px;
+  margin-top: 8px;
+}
+
+.camera{
+  font-size: 20px;
+  /*margin-top: 1.5rem;*/
+}
+
+.buttons{
+  font-size: 16px;
+  /*margin-top: 1rem;*/
+  /*margin-bottom: -1rem;*/
+}
+
+.links{
+  /*margin-top: 1.5rem;*/
+  text-align: center;
+}
+
+.icons{
+
+}
+</style>
