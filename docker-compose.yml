@@ -26,6 +26,9 @@ services:
       context: ./Preprocessing
     environment:
       - "PYTHONUNBUFFERED=1"
+  model_generator:
+    build:
+      context: ./ModelGenerator
   #endregion 
 
   #region Common services

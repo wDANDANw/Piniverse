@@ -4,8 +4,10 @@ const cors = require('cors')
 const app = express()
 
 // Get the quotes api from the environment(refer docker-compose.yml)
-const QUOTES_API_GATEWAY = process.env.QUOTES_API
-const PREPROCESSING_API_GATEWAY = process.env.PREPROCESSING_API
+// const PREPROCESSING_API_GATEWAY = process.env.PREPROCESSING_API
+const PREPROCESSING_API_GATEWAY = "http://localhost:12334"
+const MODELGENERATOR_API_GATEWAY = "http://localhost:12335"
+const PORT = 12333
 
 // Use CORS to prevent Cross-Origin Requets issue
 app.use(cors())
@@ -14,25 +16,6 @@ app.use(express.json());
 // Get the status of the API
 app.get('/api/status', (req, res) => {
     return res.json({status: 'ok'})
-})
-
-// Returns a random quote from the quote api
-app.get('/api/randomquote',async (req, res) => {
-    try {
-        const url = QUOTES_API_GATEWAY + '/api/quote'
-        const quote = await axios.get(url)
-        return res.json({
-            time: Date.now(),
-            quote: quote.data
-        })
-    } catch (error) {
-        console.log(error)
-        res.status(500)
-        return res.json({
-            message: "Internal server error",
-        })
-    }
-    
 })
 
 // Demo
@@ -83,7 +66,29 @@ app.post('/api/resolve_ner', async (req, res) => {
 })
 
 
+// Get Mesh
+app.post('/api/text_to_model', async (req, res) => {
+    try {
+        // TODO: Make this logging a middle ware
+        console.log("Callling /api/text_to_mesh")
 
+        const url = MODELGENERATOR_API_GATEWAY + '/api/text_to_model'
+        const data = req.body
+        const resolved = await axios.post(url, data)
+
+        return res.json({
+            time: Date.now(),
+            query: resolved.data.query,
+            geometry: resolved.data.geometry
+        })
+    } catch (error) {
+        // console.log(error)
+        res.status(500)
+        return res.json({
+            message: "Internal server error",
+        })
+    }
+})
 
 
 // Handle any unknown route
@@ -95,6 +100,6 @@ app.get('*', (req, res) => {
 });
 
 // starts the app
-app.listen(3000, () => {
-    console.log('API Gateway is listening on port 3000!')
+app.listen(PORT, () => {
+    console.log('API Gateway is listening on port ' + PORT)
 })

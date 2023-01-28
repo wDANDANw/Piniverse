@@ -34,15 +34,6 @@
 
       <div class="checkbox">
         <v-checkbox
-            label="pyramid"
-            dense
-            v-model="pyramidsVisible"
-            @click="togglePyramids">
-        </v-checkbox>
-      </div>
-
-      <div class="checkbox">
-        <v-checkbox
             label="axis-lines"
             v-model="axisLinesVisible"
             @click="toggleAxisLines">
@@ -113,20 +104,10 @@ export default {
   data() {
     return {
       store: viewport.useViewportStore(),
-      axisLinesVisible: true,
-      pyramidsVisible: true,
+      axisLinesVisible: true
     }
   },
   methods: {
-    togglePyramids() {
-      if (this.pyramidsVisible) {
-        this.store.HIDE_PYRAMIDS();
-        this.pyramidsVisible = false;
-      } else {
-        this.store.SHOW_PYRAMIDS();
-        this.pyramidsVisible = true;
-      }
-    },
     toggleAxisLines() {
       if (this.axisLinesVisible) {
         this.store.HIDE_AXIS_LINES();
