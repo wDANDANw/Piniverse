@@ -1,22 +1,23 @@
 import { markRaw } from "vue";
 import { defineStore } from "pinia";
 import { OrbitControls } from "three/addons/controls/OrbitControls";
-import { DragAndTransformControls } from "@/stores/utils/DragControls";
+import { DragControls } from "@/stores/utils/DragControls";
+import { TransformControls } from "@/stores/utils/TransformControls";
 import {
-    AmbientLight,
-    BufferGeometry,
-    Color,
+    AmbientLight ,
+    BufferGeometry ,
+    Color ,
     // CylinderGeometry,
-    DirectionalLight,
-    FogExp2,
-    Line,
+    DirectionalLight ,
+    FogExp2 ,
+    Line ,
     LineBasicMaterial,
     // Mesh,
     // MeshPhongMaterial,
-    PerspectiveCamera,
-    Scene,
-    Vector3,
-    WebGLRenderer,
+    PerspectiveCamera ,
+    Scene ,
+    Vector3 ,
+    WebGLRenderer ,
 } from "three";
 
 // Point Cloud Related
@@ -27,25 +28,31 @@ import {
     Float32BufferAttribute,
 } from "three";
 
-// Bounding Box related
+// Debug related
+import Stats from 'three/addons/libs/stats.module.js';
 import {
     BoxHelper,
     Mesh,
     BoxGeometry,
-    MeshNormalMaterial,
+    SphereGeometry,
+    MeshStandardMaterial
+    // MeshNormalMaterial,
     // MeshBasicMaterial,
 } from "three";
-
-import { Entity, useEntityStore } from "@/stores/entity";
-
 const DEBUG = true
 
+// Entity Related
+import { Entity, useEntityStore } from "@/stores/entity";
+
+
+// TODO: Reorganize the order of functions
 export const useViewportStore = defineStore("scene", {
     state: () => {
         return {
             width: 0,
             height: 0,
             camera: null,
+            active_control: null,
             controls: {
                 c_cam: null,
                 c_drag: null,
@@ -55,9 +62,10 @@ export const useViewportStore = defineStore("scene", {
             renderer: null,
             axisLines: [],
             point_size: 10,
-            draggable_objects: [],
-            bounding_boxes: {},
-            entities: [],
+            movable_objects: markRaw([]),
+            bounding_boxes: markRaw({}),
+            entities: markRaw([]),
+            stats: null,
         };
     },
     getters: {
@@ -80,6 +88,15 @@ export const useViewportStore = defineStore("scene", {
             el.appendChild(renderer.domElement);
 
             this.renderer = markRaw(renderer);
+
+            if (DEBUG) {
+                const container = document.createElement( 'div' );
+                el.appendChild( container );
+
+                this.stats = new Stats();
+                container.appendChild( this.stats.dom );
+            }
+
         },
         INITIALIZE_CAMERA() {
             const camera = new PerspectiveCamera(
@@ -90,7 +107,7 @@ export const useViewportStore = defineStore("scene", {
                 // 3. Near clipping plane
                 1,
                 // 4. Far clipping plane
-                1000
+                3000
             );
             camera.position.z = 500;
 
@@ -116,60 +133,127 @@ export const useViewportStore = defineStore("scene", {
             camera_control.keys = [65, 83, 68];
 
             this.controls.c_cam = markRaw(camera_control);
+            this.active_control = camera_control;
 
             // Drag Control
-            const dragControls = new DragAndTransformControls(this.draggable_objects, this.camera, this.renderer.domElement)
-            dragControls.addEventListener('dragstart', function (event) {
+            const drag_controls = new DragControls(this.movable_objects, this.camera, this.renderer.domElement)
+            drag_controls.addEventListener('dragstart', function (event) {
                 event.object.material.opacity = 0.33
             })
-            dragControls.addEventListener('dragend', function (event) {
+            drag_controls.addEventListener('dragend', function (event) {
                 event.object.material.opacity = 1
             })
-            dragControls.enabled = false; // Default to disabled
+            drag_controls.enabled = false; // Default to disabled
 
-            this.controls.c_drag = markRaw(dragControls);
+            this.controls.c_drag = markRaw(drag_controls);
 
             // Transform Controls
-            // const transformControls = new TransformControls(this.camera, this.renderer.domElement)
-            // transformControls.attach(cube)
-            // transformControls.setMode('rotate')
-            // scene.add(transformControls)
-            //
-            // transformControls.addEventListener('dragging-changed', function (event) {
-            //     orbitControls.enabled = !event.value
-            //     //dragControls.enabled = !event.value
-            // })
+            const transform_controls = new TransformControls(this.movable_objects, this.camera, this.renderer.domElement)
+            this.controls.c_trans = markRaw(transform_controls);
+            transform_controls.enabled = false;
+
+            // Fly Controls
+            // TODO: Add fly controls funcs
 
             // Control Switches
             // TODO: Switch window to vue element
+            // TODO: Generate controls on the fly
+            // TODO: Refactor to generate the controls on the fly (based on conditions) and remove them
+            //  once switches mode so the controls wouldn't watch listeners all the time
             window.addEventListener("keydown", event => {
                 switch ( event.key.toLowerCase() ) {
                     case 'd':
-                        if (this.dragging) {
-                            dragControls.enabled = false
-                            camera_control.enabled = true
-                            console.log("Disabled")
+                        if (this.active_control === drag_controls) {
+                            this.active_control.enabled = false;
+                            camera_control.enabled = true;
+                            this.active_control = camera_control;
                         } else {
-                            dragControls.enabled = true
-                            camera_control.enabled = false
-                            console.log("Enabled")
-                            console.log(this.draggable_objects)
+                            this.active_control.enabled = false;
+                            drag_controls.enabled = true;
+                            this.active_control = drag_controls;
                         }
-                        this.dragging = !this.dragging
+                        if (DEBUG) console.log("Drag Control set to" + drag_controls.enabled)
+                        break;
+                    case 'w':
+                        if (this.active_control === transform_controls) {
+                            if (transform_controls.getMode() === "translate") {
+                                this.active_control.enabled = false;
+                                camera_control.enabled = true;
+                                this.active_control = camera_control;
+                                this.scene.remove(transform_controls)
+                            } else {
+                                this.active_control.setMode("translate")
+                            }
+                        } else {
+                            this.active_control.enabled = false;
+                            transform_controls.enabled = true;
+                            transform_controls.setMode("translate");
+                            this.active_control = transform_controls;
+                            this.scene.add(transform_controls)
+                        }
+                        if (DEBUG) {
+                            console.log("Translate Control Enabled: " + transform_controls.enabled)
+                            console.log("Translate Control Latest Mode: " + transform_controls.getMode())
+                        }
+                        break;
+                    case 'e':
+                        if (this.active_control === transform_controls) {
+                            if (transform_controls.getMode() === "rotate") {
+                                this.active_control.enabled = false;
+                                camera_control.enabled = true;
+                                this.active_control = camera_control;
+                                this.scene.remove(transform_controls)
+                            } else {
+                                this.active_control.setMode("rotate")
+                            }
+                        } else {
+                            this.active_control.enabled = false;
+                            transform_controls.enabled = true;
+                            transform_controls.setMode("rotate");
+                            this.active_control = transform_controls;
+                            this.scene.add(transform_controls)
+                        }
+                        if (DEBUG) {
+                            console.log("Translate Control Enabled: " + transform_controls.enabled)
+                            console.log("Translate Control Latest Mode: " + transform_controls.getMode())
+                        }
+                        break;
+                    case 'r':
+                        if (this.active_control === transform_controls) {
+                            if (transform_controls.getMode() === "scale") {
+                                this.active_control.enabled = false;
+                                camera_control.enabled = true;
+                                this.active_control = camera_control;
+                                this.scene.remove(transform_controls)
+                            } else {
+                                this.active_control.setMode("scale")
+                            }
+                        } else {
+                            this.active_control.enabled = false;
+                            transform_controls.enabled = true;
+                            transform_controls.setMode("scale");
+                            this.active_control = transform_controls;
+                            this.scene.add(transform_controls)
+                        }
+                        if (DEBUG) {
+                            console.log("Translate Control Enabled: " + transform_controls.enabled)
+                            console.log("Translate Control Latest Mode: " + transform_controls.getMode())
+                        }
                         break;
 
                 }
             })
 
         },
+        DISABLE_ALL_CONTROLS(exception=null) {
+            for (const ctrl in this.controls) {
+                if (ctrl !== exception)
+                    ctrl.enabled = false;
+            }
+        },
         UPDATE_CONTROLS() {
             for (const ctrl in this.controls) {
                 ctrl.update();
-            }
-        },
-        UPDATE_BOUNDING_BOXES() {
-            if (Object.keys(this.bounding_boxes).length > 0) {
-                Object.values(this.bounding_boxes).forEach(box => box.update())
             }
         },
         INITIALIZE_SCENE() {
@@ -279,19 +363,40 @@ export const useViewportStore = defineStore("scene", {
         //     this.scene.add(...this.pyramids);
         //     this.RENDER();
         // },
-        INITIALIZE_ENTITIES() {
+        INITIALIZE_DEBUG_SCENE() {
             // Debug Cube
-            const geometry = new BoxGeometry()
-            geometry.scale(100, 100, 100)
-            geometry.computeBoundingBox();
-            geometry.center();
-            const material = new MeshNormalMaterial({ transparent: true })
-            const cube = new Mesh(geometry, material)
+            const c_geometry = new BoxGeometry()
+            const c_material = new MeshStandardMaterial({ transparent: true, color:"pink" })
+            const cube = new Mesh(c_geometry, c_material)
 
-            const debug_entity = new Entity( { name: "cube", obj_ref: cube })
-            debug_entity.is_draggable = true
-            debug_entity.show_bounding_box = true
-            useEntityStore().ADD_ENTITY(debug_entity)
+            const c_debug_entity = new Entity( {
+                name: "cube",
+                obj_ref: cube,
+                position: [-100,100,0],
+                scale: [100, 100, 100],
+                draggable: true,
+                show_bounding_box: true
+            })
+            useEntityStore().ADD_ENTITY(c_debug_entity)
+
+            // Debug Sphere
+            const s_geometry = new SphereGeometry(1, 32, 16);
+            const s_material = new MeshStandardMaterial({
+                color: 0xffff00,
+                wireframe: true,
+            });
+            const sphere = new Mesh(s_geometry, s_material);
+
+            const s_debug_entity = new Entity( {
+                name: "sphere",
+                obj_ref: sphere,
+                scale: [50, 50, 50],
+            })
+            s_debug_entity.is_draggable = true
+            s_debug_entity.show_bounding_box = true
+            s_debug_entity.set_position(100, 100, 0)
+            useEntityStore().ADD_ENTITY(s_debug_entity)
+
         },
         INIT(width, height, el) {
             return new Promise((resolve) => {
@@ -300,7 +405,7 @@ export const useViewportStore = defineStore("scene", {
                 this.INITIALIZE_CAMERA();
                 this.INITIALIZE_CONTROLS();
                 this.INITIALIZE_SCENE();
-                this.INITIALIZE_ENTITIES();
+                this.INITIALIZE_DEBUG_SCENE();
 
                 // Initial scene rendering
                 this.RENDER();
@@ -317,11 +422,21 @@ export const useViewportStore = defineStore("scene", {
         RENDER() {
             this.renderer.render(this.scene, this.camera);
         },
+        UPDATE_DEBUG(){
+            if (DEBUG) {
+                this.stats.update();
+
+                if (Object.keys(this.bounding_boxes).length > 0) {
+                    Object.values(this.bounding_boxes).forEach(entity => entity.update_bounding_box())
+                }
+            }
+        },
         ANIMATE() {
             window.requestAnimationFrame(this.ANIMATE);
 
             this.RENDER();
-            this.UPDATE_BOUNDING_BOXES();
+            this.UPDATE_DEBUG();
+
         },
         ADD_TO_SCENE(entity) {
             this.scene.add(entity.obj_ref)
@@ -332,7 +447,7 @@ export const useViewportStore = defineStore("scene", {
             // this.RENDER() // Probably unnecessary since updating each frame
         },
         ADD_TO_DRAGGABLE (entity) {
-            this.draggable_objects.push(entity.obj_ref)
+            this.movable_objects.push(entity.obj_ref)
         },
         REMOVE_FROM_DRAGGABLE (entity) {
             // TODO
@@ -346,8 +461,9 @@ export const useViewportStore = defineStore("scene", {
             // https://threejs.org/docs/#api/en/helpers/BoxHelper
 
             const bounding_box = new BoxHelper(entity.obj_ref, 0xffff00);
+            entity.bounding_box_ref = bounding_box;
             this.scene.add(bounding_box)
-            this.bounding_boxes[entity] = bounding_box
+            this.bounding_boxes[entity.obj_ref.uuid] = entity
         },
         REMOVE_BOUNDING_BOX (entity) {
             // TODO

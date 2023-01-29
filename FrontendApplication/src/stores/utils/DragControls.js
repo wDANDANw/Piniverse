@@ -1,7 +1,7 @@
 // Customized Drag Control
 // Original Reference: https://github.com/mrdoob/three.js/blob/master/examples/jsm/controls/DragControls.js
-// Transform Control Reference: https://github.com/mrdoob/three.js/blob/master/examples/jsm/controls/TransformControls.js
 // Example of multi control reference: https://sbcode.net/threejs/multi-controls-example/
+
 import {
     EventDispatcher,
     Matrix4,
@@ -20,7 +20,7 @@ const _intersection = new Vector3();
 const _worldPosition = new Vector3();
 const _inverseMatrix = new Matrix4();
 
-class DragAndTransformControls extends EventDispatcher {
+class DragControls extends EventDispatcher {
 
     constructor( _objects, _camera, _domElement ) {
 
@@ -221,4 +221,4 @@ class DragAndTransformControls extends EventDispatcher {
 
 }
 
-export { DragAndTransformControls };
+export { DragControls };
