@@ -1,0 +1,49 @@
+Entities: {
+    "Yellow Corgi": {
+        "Properties": {
+            "animal": {
+                "breed": "corgi",
+                "color": "yellow"
+            }
+        },
+        "Behaviors": {
+            "movement": {
+                "location": "under a christmas tree"
+            },
+            "action": {
+                "what": "staring",
+            }
+        },
+        "Psychologies": {
+            "internal": {
+                "mood": "excited"
+            },
+            "external": {
+                "stimulus": "christmas tree"
+            }
+        }
+    },
+    "Christmas Tree": {
+        "Properties": {
+            "object": {
+                "type": "christmas tree"
+            }
+        },
+        "Behaviors": {
+            "decoration": {
+                "ornaments": "lights, stockings, ornaments, garland"
+            },
+            "placement": {
+                "location": "indoors"
+            }
+        },
+        "Psychologies": {
+            "internal": {
+                "mood": "festive"
+            },
+            "external": {
+                "stimulus": "yellow corgi"
+            }
+        }
+    }
+}

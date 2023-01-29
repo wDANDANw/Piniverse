@@ -1,0 +1,31 @@
+Assume:
+
+// Possible If Predicates:
+Compare: This function compares numerical and boolean values. The relationships are established by a set of comparison operators whose elements can be greater, greater or equal, equal, less or equal and less.
+
+Timer: This function handles the system's timing. It determines if a specific time x has expired so that the evaluation of the function is true.
+
+Pointer: This function controls the pointer-events on screen, where x represents the coordinates for those events on the game space.
+
+Keyboard: This function oversees the system's keyboard events, where x is the code for a specific key and label represents the event mode.
+
+Collide: This function watches the collision detection between game actors, where Ag is the actor to report a collision.
+
+// Possible Do Predicates:
+Create: It creates a new actor in the game as a copy of an existing actor Ag in the environment.
+
+Read: It allows reading the information of a property that may belong to an actor Ag ∈ AG or to the environment Env of the game.
+
+Update: It modifies the value of a property that can belong to an actor Ag or the environment Env of the game. The new value is determined from the evaluation of an arithmetic expression.
+
+Delete: It removes an actor Ag from the game environment.
+
+// Task
+Rewrite the following events to the predicate logic format in the examples.
+Format your response similar to the following example:
+initialization (ρ1)		{ If(compare(init, TRUE, equal)) → Do(update(velocity, random(−100, 100))) ∧ Do(update(init, FALSE))}
+wallXCollision (ρ2)		{ If(collide(wallX)) → Do(update(velocity.x, −1 * velocity.x))}
+wallYCollision (ρ3)		{ If(collide(wallY)) → Do(update(velocity.y, −1 * velocity.y))}
+wolfCollision (ρ4)		{ If(collide(wolf) → Do(delete(sheep))}
+reproduce (ρ5)			{ If(compare(random(0, 100), 2, less)) → If(compare(energy, 50, greaterEqual)) → Do(create(sheep)) ∧ Do(update(energy, energy - 50))}
+grassCollision (ρ6)		{ If(collide(grass)) → Do(update(energy, energy + 50))}

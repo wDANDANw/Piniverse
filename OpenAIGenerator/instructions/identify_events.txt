@@ -1,0 +1,26 @@
+Identify all events mentioned in the story.
+
+Each event should only describe 1-2 "what". If there are multiple "what" between the same entities, separate them into different events. If no results to any field, give "unknown". 
+
+Strictly follow the json-style structure
+
+Format your response similar to the following example:
+"Events": {
+    "event_name": {
+        "who": {
+
+        },
+        "when": {
+            ...
+        },
+        "how": {
+            ...
+        },
+        "what": {
+            ...
+        }
+        "where": {
+            ...
+        }
+    }
+}

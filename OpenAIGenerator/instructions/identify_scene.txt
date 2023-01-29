@@ -1,0 +1,38 @@
+Generate a nested tree structure to describe the scene mentioned in the query_prompt. Analyze and try to imagine the scene, and give different but reasonable scaling, rotations, and positions to each entity.
+
+Format your response similar to the following example:
+"Scene": {
+    "name": "...",
+    "coordinate system": "Cartesian",
+    "world_position": [1, 1, 1],
+    "relative_position": [0, 0, 0],
+    "scale": [1, 1, 1],
+    "children": {
+        "children_1": {
+            "name": "...",
+            "description": "...",
+            "children": {
+                "children_1_1": {
+                    "name": "...",
+                    "description": "...",
+                    "world_position": [2, 2, 2],
+                    "relative_position": [1, 1, 1],
+                    "rotation": [0.3, 0.2, 0.45],
+                    "scale": [1, 1, 1]
+                },
+                ...
+            },
+            "world_position": [3, 3, 3],
+            "relative_position": [2, 2, 2],
+            "scale": [1, 1, 1]
+        },
+        "children_2": {
+            "name": "...",
+            "description": "...",
+            "children": {},
+            "world_position": [4, 4, 4],
+            "relative_position": [3, 3, 3],
+            "scale": [1, 1, 1]
+        }
+    }
+}
