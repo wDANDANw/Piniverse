@@ -1,8 +1,8 @@
 import { markRaw } from "vue";
 import { defineStore } from "pinia";
 import { OrbitControls } from "three/addons/controls/OrbitControls";
-import { DragControls } from "@/stores/utils/DragControls";
-import { TransformControls } from "@/stores/utils/TransformControls";
+import { DragControls } from "@/stores/custom_modules/DragControls";
+import { TransformControls } from "@/stores/custom_modules/TransformControls";
 import {
     AmbientLight ,
     BufferGeometry ,
@@ -469,23 +469,17 @@ export const useViewportStore = defineStore("scene", {
             // TODO
             console.log(entity)
         },
-
-        // eslint-disable-next-line no-unused-vars
-        ADD_OBJECT_PC(name, geometry) {
+        CREATE_PC_OBJECT(name, geometry) {
             /***
-             *  Add object, point cloud version
+             *  Creates a point three js cloud object and return it
              *  name: name of the model
-             *  geometry: {coords, color}
+             *  geometry: {coords, colors}
+             *  @return: point cloud object
              */
 
-            // TODO: Make use of name for entity semantic info / processing (like entities graph)
-            // name ...
-
-            // Add object point cloud
+            // References
             // Reference: https://stackoverflow.com/questions/66225871/how-to-give-each-point-its-own-color-in-threejs
             // Reference 2: OFFICIAL PCD LOADER: https://github.com/mrdoob/three.js/blob/master/examples/jsm/loaders/PCDLoader.js
-
-            if (DEBUG) console.log(geometry)
 
             // Constants
             const PC_CORRECTION = 1 // Correct the coords to center at 0, 0, 0
@@ -500,10 +494,7 @@ export const useViewportStore = defineStore("scene", {
             const positions = []
             const colors = []
 
-            const params = {
-                scale: [100, 100, 100], // Default scaling
-                position: [0, 0, 0], // Center
-            }
+            let centroid = [0, 0, 0]
 
             let vertex, vx, vy, vz, color;
             for (let i = 0; i < geometry.coords.length; i ++ ) {
@@ -522,13 +513,10 @@ export const useViewportStore = defineStore("scene", {
                 colors.push(color[0], color[1], color[2])
             }
 
-            params.position = [center_x/num_of_points, center_y/num_of_points, center_z/num_of_points]
+            centroid = [center_x/num_of_points, center_y/num_of_points, center_z/num_of_points]
 
             object_geometry.setAttribute( 'position', new Float32BufferAttribute( positions, 3 ) );
             object_geometry.setAttribute( 'color', new Float32BufferAttribute( colors, 3 ) );
-            object_geometry.computeBoundingBox();
-            object_geometry.center();
-            object_geometry.scale(params.scale[0], params.scale[1], params.scale[2])
 
             // Material
             const material = new PointsMaterial({
@@ -537,17 +525,10 @@ export const useViewportStore = defineStore("scene", {
                 vertexColors: true
             });
 
-            // Point Cloud
-            const point_cloud = new Points(object_geometry, material);
-            point_cloud.position.set(100, 100, 0)
+            console.log(centroid)
 
-            // Entity
-            const new_entity = new Entity( { name: name, obj_ref: point_cloud })
-            new_entity.is_draggable = true
-            new_entity.show_bounding_box = true
-            new_entity.scale = params.scale
-            new_entity.position = params.position
-            useEntityStore().ADD_ENTITY(new_entity)
+            // Return Point Cloud Object
+            return new Points(object_geometry, material);
         },
 
 

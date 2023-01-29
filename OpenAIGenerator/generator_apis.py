@@ -81,22 +81,33 @@ def identify_entities(query: str, query_info: str="", file: TextIO=None):
         logs += f"Time: {current_time_str}\n\n"
         logs += f"Request Prompt:\n{request_prompt} \n\n"
 
-        response = openai.Completion.create(
-            model="text-davinci-003",
-            prompt=request_prompt,
-            temperature=0.7,
-            max_tokens=4097 - count_tokens(request_prompt),
-            top_p=1,
-            frequency_penalty=0,
-            presence_penalty=0,
-            n=1,
-        )
+        entities = None
+        counter = 0
 
-        logs += f"Response:\n{str(response)}\n"
-        text = response["choices"][0]["text"].replace('\\n', '\n').replace('\\t', '\t')
+        # In case return None
+        while (entities is None and counter < 5):
+            counter += 1
+            response = openai.Completion.create(
+                model="text-davinci-003",
+                prompt=request_prompt,
+                temperature=0.8,
+                max_tokens=4097 - count_tokens(request_prompt),
+                top_p=1,
+                frequency_penalty=0,
+                presence_penalty=0,
+                n=1,
+            )
 
-        regex_pattern = "(.*Entities.*\:[\s]*)({(.|\n)*})"
-        entities = loads_json(re.search(regex_pattern, text).group(2))
+            logs += f"Response:\n{str(response)} {counter}\n"
+            text = response["choices"][0]["text"].replace('\\n', '\n').replace('\\t', '\t')
+
+            regex_pattern = "(.*Entities.*\:[\s]*)({(.|\n)*})"
+
+            try:
+                entities = loads_json(re.search(regex_pattern, text).group(2))
+            except Exception as e:
+                logs += f"Errored: str(e)\n\n"
+
 
         logs += f"Extracted Entities in JSON:\n{str(entities)}\n"
         logs += "Identify Entities End".upper().center(LOGS_FILL_WIDTH, LOGS_FILL_CHAR)
@@ -105,8 +116,8 @@ def identify_entities(query: str, query_info: str="", file: TextIO=None):
         entity_names = list(entities.keys())
         return entities, entity_names
     except Exception as e:
-        print(e)
-        return Exception(e)
+        logs += f"Errored: {str(e)}\n\n"
+        return None, None
     finally:
         # Logging
         if file:
@@ -156,8 +167,8 @@ def identify_scene(query: str,  entity_names: list, query_info: str="", file: Te
 
         return scene
     except Exception as e:
-        print(e)
-        return Exception(e)
+        logs += f"Errored: {str(e)}\n\n"
+        return None
     finally:
         # Logging
         if file:
@@ -206,8 +217,8 @@ def identify_events(query: str,  entity_names: list, query_info: str="", file: T
 
         return events
     except Exception as e:
-        print(e)
-        return Exception(e)
+        logs += f"Errored: {str(e)}\n\n"
+        return None
     finally:
         # Logging
         if file:
@@ -219,6 +230,7 @@ def identify_events(query: str,  entity_names: list, query_info: str="", file: T
 def generate_logics(entities: dict, events: dict, query_info: str="", file: TextIO=None):
     # Json dumps for pretty print for nested dict
     # Reference: https://stackoverflow.com/questions/3229419/how-to-pretty-print-nested-dictionaries
+
     additional_instructions = f"// Known Entities and Behaviors\n" \
                               f"Entities: \n {str(json.dumps(entities))}\n\n" \
                               f"// Events to reconstruct\n" \
@@ -256,8 +268,8 @@ def generate_logics(entities: dict, events: dict, query_info: str="", file: Text
 
         return generated_logics
     except Exception as e:
-        print(e)
-        return Exception(e)
+        logs += f"Errored: {str(e)}\n\n"
+        return None
     finally:
         # Logging
         if file:
@@ -280,15 +292,36 @@ def analyze_story(query: str, query_info: str=""):
 
         # Step 1: generate entities
         entities, entity_names = identify_entities(query, query_info, file=f)
+        if entities is None or entity_names is None:
+            f.write("Errored when trying to identify entities")
+            return None, None, None, None
 
         # Step 2: analyze the scene with entity_names
         scene = identify_scene(query, entity_names=entity_names, file=f)
+        if scene is None:
+            f.write("Errored when trying to identify scenes")
+            return None, None, None, None
 
         # Step 3: analyze the events
         events = identify_events(query, entity_names=entity_names, file=f)
+        if events is None:
+            f.write("Errored when trying to identify entities")
+            return None, None, None, None
 
         # Step 4: generate logics
         logics = generate_logics(entities, events, file=f)
+        if logics is None:
+            f.write("Errored when trying to generate logics")
+            return None, None, None, None
+
+        # Log the results
+        f.write(f"\n\n ****** Final Results ****** \n\n")
+        f.write(f"Entities: \n{json.dumps(entities)}\n\n")
+        f.write(f"Scene: \n{json.dumps(scene)}\n\n")
+        f.write(f"Events: \n{json.dumps(events)}\n\n")
+        f.write(f"Logics: \n{json.dumps(logics)}\n\n")
+
+        f.write(f"\n\n\n Task End Time: {datetime.now().strftime(DATE_TIME_FORMAT)}")
 
         return entities, scene, events, logics
 
@@ -311,10 +344,10 @@ def generate_story(query: str, query_info: str=""):
     """
     pass
 
-
-msg_1 = "A yellow corgi under a christmas tree"
-story_path = "./stories/story_2.txt"
-with open(story_path, "r", encoding="utf-8") as f:
-    msg_2 = f.read()
-
-print(analyze_story(msg_1))
+#
+# msg_1 = "A yellow corgi under a christmas tree"
+# story_path = "./stories/story_2.txt"
+# with open(story_path, "r", encoding="utf-8") as f:
+#     msg_2 = f.read()
+#
+# print(analyze_story(msg_2))

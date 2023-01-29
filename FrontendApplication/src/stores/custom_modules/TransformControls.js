@@ -257,7 +257,21 @@ class TransformControls extends Object3D {
 
             if ( this._hovered !== object ) {
 
-                if ( this._hovered ) this._hovered.material.emissive.setHex( this._hovered.currentHex );
+                if ( this._hovered ) {
+
+                    console.log(typeof (this._hovered.material))
+
+                    // Emissive materials
+                    if (this._hovered.material.emissive) {
+                        this._hovered.material.emissive.setHex( this._hovered.currentHex );
+                    }
+
+                    // Non-emissive materials
+                    else {
+                        console.log("123")
+                    }
+
+                }
 
                 this._hovered = obj_intersections[ 0 ].object;
                 this._hovered.currentHex = this._hovered.material.emissive.getHex();

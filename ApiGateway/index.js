@@ -7,6 +7,7 @@ const app = express()
 // const PREPROCESSING_API_GATEWAY = process.env.PREPROCESSING_API
 const PREPROCESSING_API_GATEWAY = "http://localhost:12334"
 const MODELGENERATOR_API_GATEWAY = "http://localhost:12335"
+const STORY_ANALYZER_API_GATEWAY = "http://localhost:12336"
 const PORT = 12333
 
 // Use CORS to prevent Cross-Origin Requets issue
@@ -70,7 +71,7 @@ app.post('/api/resolve_ner', async (req, res) => {
 app.post('/api/text_to_model', async (req, res) => {
     try {
         // TODO: Make this logging a middle ware
-        console.log("Callling /api/text_to_mesh")
+        console.log("Calling /api/text_to_mesh")
 
         const url = MODELGENERATOR_API_GATEWAY + '/api/text_to_model'
         const data = req.body
@@ -83,6 +84,58 @@ app.post('/api/text_to_model', async (req, res) => {
         })
     } catch (error) {
         // console.log(error)
+        res.status(500)
+        return res.json({
+            message: "Internal server error",
+        })
+    }
+})
+
+// Story to scene
+app.post('/api/story_to_scene', async (req, res) => {
+    try {
+        // TODO: Make this logging a middle ware
+        console.log("Calling /api/story_to_scene")
+
+        // First analyze the story
+
+        const analyze_story_url = STORY_ANALYZER_API_GATEWAY + '/api/analyze_story'
+        const data = req.body
+        const response = await axios.post(analyze_story_url, data)
+
+        if (response.status === 500) {
+            res.status(500)
+            return res.json({
+                message: "Internal server error: Analyze Story Failed",
+            })
+        }
+
+        const entities = JSON.parse(response.data.entities)
+        const scene = JSON.parse(response.data.scene)
+        const events = JSON.parse(response.data.events)
+        const logics = JSON.parse(response.data.logics)
+
+        // Generate Geometries for Entities
+        const model_generation_url = MODELGENERATOR_API_GATEWAY + '/api/text_to_model';
+        let query, geo_res = "";
+        for ( const [name, ontologies] of Object.entries(entities) ) {
+            query = JSON.stringify([name, ontologies])
+            geo_res = await axios.post(model_generation_url, {query: query})
+            entities[name]["Geometry"] = JSON.parse(geo_res.data.geometry)
+        }
+
+        // The front end can directly use the objects as they are passed in json
+        // It seems that the frontend will automatically unpack it
+        return res.json({
+            time: Date.now(),
+            query: req.body.query,
+            entities: entities,
+            scene: scene,
+            events: events,
+            logics: logics,
+        })
+    } catch (error) {
+        console.log("Got Error: " + error)
         res.status(500)
         return res.json({
             message: "Internal server error",

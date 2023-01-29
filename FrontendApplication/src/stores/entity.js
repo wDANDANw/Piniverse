@@ -11,17 +11,21 @@ export class Entity {
         {
             name="default_name",
             obj_ref=null,
+            properties = {},
+            behaviors = {},
+            psychologies = {},
             scale=[1, 1, 1],
             position=[0, 0, 0],
             draggable = false,
-            ontologies = {},
             is_visible = true,
             show_bounding_box=true,
         }) {
 
         // Static Semantics
         this.name = name;
-        this.ontologies = ontologies; // Entity Ontology / Adjs
+        this.properties = properties;
+        this.behaviors = behaviors;
+        this.psychologies = psychologies;
 
         // Dynamic Semantics
         // this.behaviors = {};
@@ -34,7 +38,7 @@ export class Entity {
             return
         }
 
-        this.obj_ref = obj_ref; // Renderable object in the scene
+        this.obj_ref = obj_ref; // three js object in the scene
         this.obj_ref.geometry.computeBoundingBox();
         this.obj_ref.geometry.center();
 
@@ -83,22 +87,65 @@ export const useEntityStore = defineStore("entity_store", {
         },
     },
     actions: {
+        // Method to create a new entity from
+        CREATE_ENTITY(
+            {
+                name,
+                geometry,
+                geometry_type="default_geometry_type",
+                scale=[1, 1, 1],
+                position=[0, 0, 0],
+                draggable = false,
+                properties = {},
+                behaviors = {},
+                psychologies = {},
+                is_visible = true,
+                show_bounding_box=true,
+            }){
+
+            const viewport_store = useViewportStore()
+
+            let obj_ref;
+            switch ( geometry_type ) {
+                case "pc":
+                    obj_ref = viewport_store.CREATE_PC_OBJECT(name, geometry)
+                    break;
+                default:
+                    console.error("Got " + geometry_type + " in entity_store.CREATE_ENTITY. Type not supported. Check your params")
+                    return null
+            }
+
+            // Create a New Entity
+            return new Entity( {
+                name: name,
+                obj_ref: obj_ref,
+                properties: properties,
+                behaviors: behaviors,
+                psychologies: psychologies,
+                scale: scale,
+                position: position,
+                draggable: draggable,
+                is_visible: is_visible,
+                show_bounding_box: show_bounding_box,
+            })
+        },
         ADD_ENTITY(entity) {
             entity = markRaw(entity)
-            const store = useViewportStore()
+            const viewport_store = useViewportStore()
             this.entities.push(entity)
             if (entity.is_visible) {
-                store.ADD_TO_SCENE(entity)
+                viewport_store.ADD_TO_SCENE(entity)
             }
             if (entity.is_draggable) {
-                store.ADD_TO_DRAGGABLE(entity)
+                viewport_store.ADD_TO_DRAGGABLE(entity)
             }
             if (entity.show_bounding_box) {
-                store.ADD_BOUNDING_BOX(entity)
+                viewport_store.ADD_BOUNDING_BOX(entity)
             }
         },
         REMOVE_ENTITY(entity) {
-            this.entities.remove(entity)
+            console.log("Not implemented: Remove entities in entity store for " + entity.name)
+            // this.entities.remove(entity)
         }
     }
 
