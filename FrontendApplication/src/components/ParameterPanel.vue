@@ -40,7 +40,7 @@
 
 <script>
 import axios from "axios";
-const api_gateway = 'http://localhost:12333' // Hardcoded, should use EnvironmentPlugin(['API_GATEWAY'])
+const api_gateway = process.env.VUE_APP_API_SERVER_GATEWAY
 
 // Viewport related
 import { mapActions } from 'pinia'
@@ -82,7 +82,7 @@ export default {
     },
 
     async story_to_scene() {
-      this.outwput_str = "Generating Story to Scene";
+      this.output_str = "Generating Story to Scene";
       const resolver_api = "/api/story_to_scene";
       const url = api_gateway + resolver_api;
       let vm = this;

@@ -9,9 +9,19 @@ from flask import request
 
 app = Flask(__name__)
 
+# Environment
+# https://danhwashere.com/flask-env-config
+# https://flask.palletsprojects.com/en/2.2.x/config/#configuring-from-files
+# https://stackoverflow.com/questions/15603240/flask-how-to-manage-different-environment-databases
+app.config.from_object("default_settings")
+app.config.from_envvar('CONFIG_PATH',silent=True)
+print("Using Config: " + os.environ.get("CONFIG_PATH", default="default_settings"))
+
 # Service Imports
 from generator_apis import *
 
+# Debug
+GLOBAL_DEBUG_FLAG = app.config["DEBUG"]
 DEBUG_INSTANCE = None
 debug_file_path = "./debug.txt"
 if os.path.exists(debug_file_path) and os.path.getsize(debug_file_path) > 0:
@@ -23,7 +33,10 @@ if os.path.exists(debug_file_path) and os.path.getsize(debug_file_path) > 0:
 @app.route("/api/analyze_story", methods=['POST'])
 def analyze_story_api():
 
-    debug = True
+    # Function level debug flag
+    debug = GLOBAL_DEBUG_FLAG
+
+    if debug: print("Calling 'analyze_story'")
 
     data = request.get_json()
     query = data["query"]
@@ -60,5 +73,5 @@ def page_not_found(e):
     return jsonify({"message": "Resource not found"}), 404
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=12336, debug=True) # run application
+    app.run(host='0.0.0.0', port=app.config["PORT"], debug=True) # run application
     

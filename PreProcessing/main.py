@@ -1,4 +1,5 @@
 # Main.py for Preprocessing Module
+import os
 
 # Server
 from flask import Flask
@@ -12,6 +13,11 @@ from tokenization import EntityResolver
 
 # NER
 from ner import get_ner
+
+# Environment
+app.config.from_object("default_settings")
+app.config.from_envvar('CONFIG_PATH',silent=True)
+print("Using Config: " + os.environ.get("CONFIG_PATH", default="default_settings"))
 
 # Gets a random quote 
 @app.route("/api/resolve_entity", methods=['POST'])
@@ -41,5 +47,5 @@ def page_not_found(e):
     return jsonify({"message": "Resource not found"}), 404
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True) # run application
+    app.run(host='0.0.0.0', port=app.config["PORT"], debug=True) # run application
     

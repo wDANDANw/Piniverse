@@ -4,7 +4,9 @@
   "description": "A simple api gateway",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js",
+    "start": "dotenv -e .env.development -- node index.js",
+    "dev": "dotenv -e .env.development -- node index.js",
+    "docker": "dotenv -e .env.docker -- node index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Kasun Vithanage",
@@ -12,6 +14,7 @@
   "dependencies": {
     "axios": "^0.18.0",
     "cors": "^2.8.4",
+    "dotenv-cli": "^7.0.0",
     "express": "^4.16.3"
   }
 }

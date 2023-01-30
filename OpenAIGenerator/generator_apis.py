@@ -305,7 +305,7 @@ def analyze_story(query: str, query_info: str=""):
         # Step 3: analyze the events
         events = identify_events(query, entity_names=entity_names, file=f)
         if events is None:
-            f.write("Errored when trying to identify entities")
+            f.write("Errored when trying to identify events")
             return None, None, None, None
 
         # Step 4: generate logics

@@ -3,13 +3,14 @@ import { defineStore } from "pinia";
 import { OrbitControls } from "three/addons/controls/OrbitControls";
 import { DragControls } from "@/stores/custom_modules/DragControls";
 import { TransformControls } from "@/stores/custom_modules/TransformControls";
+import { FlyControls } from "@/stores/custom_modules/FlyControls";
 import {
     AmbientLight ,
     BufferGeometry ,
     Color ,
     // CylinderGeometry,
     DirectionalLight ,
-    FogExp2 ,
+    // FogExp2 ,
     Line ,
     LineBasicMaterial,
     // Mesh,
@@ -52,11 +53,13 @@ export const useViewportStore = defineStore("scene", {
             width: 0,
             height: 0,
             camera: null,
-            active_control: null,
             controls: {
                 c_cam: null,
                 c_drag: null,
                 c_trans: null,
+                c_fly: null,
+                c_active: null,
+                c_prev: null,
             },
             scene: null,
             renderer: null,
@@ -133,7 +136,8 @@ export const useViewportStore = defineStore("scene", {
             camera_control.keys = [65, 83, 68];
 
             this.controls.c_cam = markRaw(camera_control);
-            this.active_control = camera_control;
+            this.controls.c_active = camera_control;
+            this.controls.c_prev = null;
 
             // Drag Control
             const drag_controls = new DragControls(this.movable_objects, this.camera, this.renderer.domElement)
@@ -153,93 +157,173 @@ export const useViewportStore = defineStore("scene", {
             transform_controls.enabled = false;
 
             // Fly Controls
-            // TODO: Add fly controls funcs
+            const fly_controls = new FlyControls(this.camera, this.renderer.domElement);
+            this.controls.c_fly = markRaw(fly_controls);
+            fly_controls.enabled = false;
+
+            const _c_helpers = {
+                turn_on_control: (new_control) => {
+
+                    if (new_control === this.controls.c_active) return;
+
+                    if (this.controls.c_prev === this.controls.c_prev) {
+                        this.controls.c_trans.reset_hovered_object()
+                    }
+
+                    this.controls.c_active.enabled = false;
+                    this.controls.c_prev = this.controls.c_active;
+                    new_control.enabled = true;
+                    this.controls.c_active = new_control;
+
+                    if (new_control === this.controls.c_trans) {
+                        this.scene.add(this.controls.c_trans)
+                    }
+                },
+                switch_to_prev_control: () => {
+
+                    // Turn on prev, turn off current
+                    this.controls.c_active.enabled = false;
+                    this.controls.c_prev.enabled = true;
+
+                    // Switch
+                    const current = this.controls.c_active
+                    this.controls.c_active = this.controls.c_prev
+                    this.controls.c_prev = current;
+
+                    // Check transform control
+                    if (this.controls.c_active === this.controls.c_trans) {
+                        this.scene.add(this.controls.c_trans)
+                    }
+                },
+                switch_non_cam_to_cam: (non_cam_control)=>{
+                    // This will be called when a non-cam control is trying to switch to a cam control
+                    // For example, when a non-cam control is trying to turn off, it should revert back to a cam-control
+                    // However, need to check what cam control to turn on (return to)
+
+                    // Find the correct cam control to use
+                    let cam_control;
+
+                    // Check if the previous control is fly control
+                    if (this.controls.c_prev === this.controls.c_fly) {
+                        cam_control = this.controls.c_fly
+                    } else {
+                        cam_control = this.controls.c_cam;
+                    }
+
+                    // Switch controls
+                    cam_control.enabled = true;
+                    non_cam_control.enabled = false;
+                    this.controls.c_prev = non_cam_control;
+                    this.controls.c_active = cam_control;
+                },
+                switch_active_transform_control: (target_mode) => {
+                    // This will be called when transform control is active
+                    // If current mode is same as target mode, then switch to camera controls
+                    // Else, switch to another transform control mode
+
+                    // Check if the current and target mode are the same
+                    if (this.controls.c_trans.getMode() === target_mode) {
+
+                        // If same, turn to camera control
+                        _c_helpers.switch_non_cam_to_cam(this.controls.c_trans)
+                        this.controls.c_trans.reset_hovered_object()
+                        this.scene.remove(this.controls.c_trans)
+
+                    } else {
+
+                        // Else, switch to another mode
+                        this.controls.c_active.setMode(target_mode)
+                    }
+                }
+            }
+
 
             // Control Switches
-            // TODO: Switch window to vue element
+            // TODO: Switch window to vue element?
             // TODO: Generate controls on the fly
             // TODO: Refactor to generate the controls on the fly (based on conditions) and remove them
             //  once switches mode so the controls wouldn't watch listeners all the time
+            // TODO: Refactor code to smaller functions
             window.addEventListener("keydown", event => {
                 switch ( event.key.toLowerCase() ) {
-                    case 'd':
-                        if (this.active_control === drag_controls) {
-                            this.active_control.enabled = false;
-                            camera_control.enabled = true;
-                            this.active_control = camera_control;
-                        } else {
-                            this.active_control.enabled = false;
-                            drag_controls.enabled = true;
-                            this.active_control = drag_controls;
+                    case 'd': // Drag
+
+                        // If the active control is drag control, then either turn back to fly control or camera control
+                        if (this.controls.c_active === this.controls.c_drag) {
+                            _c_helpers.switch_non_cam_to_cam(this.controls.c_drag)
+                        } else { // Else, turn on drag control
+                            _c_helpers.turn_on_control(this.controls.c_drag)
                         }
-                        if (DEBUG) console.log("Drag Control set to" + drag_controls.enabled)
+                        if (DEBUG) console.log("Drag Control set to" + this.controls.c_drag.enabled)
                         break;
-                    case 'w':
-                        if (this.active_control === transform_controls) {
-                            if (transform_controls.getMode() === "translate") {
-                                this.active_control.enabled = false;
-                                camera_control.enabled = true;
-                                this.active_control = camera_control;
-                                this.scene.remove(transform_controls)
-                            } else {
-                                this.active_control.setMode("translate")
-                            }
+
+                    case 'w': // Move | Translate
+
+                        // If the active control is transform control, then use
+                        // the helper to switch either mode or turn to a camera control
+                        if (this.controls.c_active === this.controls.c_trans) {
+                            _c_helpers.switch_active_transform_control("translate")
                         } else {
-                            this.active_control.enabled = false;
-                            transform_controls.enabled = true;
-                            transform_controls.setMode("translate");
-                            this.active_control = transform_controls;
-                            this.scene.add(transform_controls)
+                            this.controls.c_trans.setMode("translate")
+                            _c_helpers.turn_on_control(this.controls.c_trans)
                         }
                         if (DEBUG) {
-                            console.log("Translate Control Enabled: " + transform_controls.enabled)
-                            console.log("Translate Control Latest Mode: " + transform_controls.getMode())
+                            console.log("Translate Control Enabled: " + this.controls.c_trans.enabled)
+                            console.log("Translate Control Latest Mode: " + this.controls.c_trans.getMode())
                         }
                         break;
-                    case 'e':
-                        if (this.active_control === transform_controls) {
-                            if (transform_controls.getMode() === "rotate") {
-                                this.active_control.enabled = false;
-                                camera_control.enabled = true;
-                                this.active_control = camera_control;
-                                this.scene.remove(transform_controls)
-                            } else {
-                                this.active_control.setMode("rotate")
-                            }
+
+                    case 'e': // Rotate
+
+                        // If the active control is transform control, then use
+                        // the helper to switch either mode or turn to a camera control
+                        if (this.controls.c_active === this.controls.c_trans) {
+                            _c_helpers.switch_active_transform_control("rotate")
                         } else {
-                            this.active_control.enabled = false;
-                            transform_controls.enabled = true;
-                            transform_controls.setMode("rotate");
-                            this.active_control = transform_controls;
-                            this.scene.add(transform_controls)
+                            this.controls.c_trans.setMode("rotate")
+                            _c_helpers.turn_on_control(this.controls.c_trans)
                         }
                         if (DEBUG) {
-                            console.log("Translate Control Enabled: " + transform_controls.enabled)
-                            console.log("Translate Control Latest Mode: " + transform_controls.getMode())
+                            console.log("Translate Control Enabled: " + this.controls.c_trans.enabled)
+                            console.log("Translate Control Latest Mode: " + this.controls.c_trans.getMode())
                         }
                         break;
+
                     case 'r':
-                        if (this.active_control === transform_controls) {
-                            if (transform_controls.getMode() === "scale") {
-                                this.active_control.enabled = false;
-                                camera_control.enabled = true;
-                                this.active_control = camera_control;
-                                this.scene.remove(transform_controls)
-                            } else {
-                                this.active_control.setMode("scale")
-                            }
+
+                        // If the active control is transform control, then use
+                        // the helper to switch either mode or turn to a camera control
+                        if (this.controls.c_active === this.controls.c_trans) {
+                            _c_helpers.switch_active_transform_control("scale")
                         } else {
-                            this.active_control.enabled = false;
-                            transform_controls.enabled = true;
-                            transform_controls.setMode("scale");
-                            this.active_control = transform_controls;
-                            this.scene.add(transform_controls)
+                            this.controls.c_trans.setMode("scale")
+                            _c_helpers.turn_on_control(this.controls.c_trans)
                         }
                         if (DEBUG) {
-                            console.log("Translate Control Enabled: " + transform_controls.enabled)
-                            console.log("Translate Control Latest Mode: " + transform_controls.getMode())
+                            console.log("Translate Control Enabled: " + this.controls.c_trans.enabled)
+                            console.log("Translate Control Latest Mode: " + this.controls.c_trans.getMode())
                         }
                         break;
+
+                    // TODO: Implement fly control
+                    // TODO: Cannot implement like this since the key listeners will collide
+                    // TODO: Not hard - just need to remap keys
+                    // case 'f':
+                    //
+                    //     // If the active control is drag control, then either turn back to fly control or camera control
+                    //     if (this.controls.c_active === this.controls.c_fly) {
+                    //
+                    //         // Switch to previous control
+                    //
+                    //     } else { // Else, turn on drag control
+                    //         _c_helpers.turn_on_control(this.controls.c_fly)
+                    //     }
+                    //     if (DEBUG) console.log("Drag Control set to" + this.controls.c_drag.enabled)
+                    //     break;
+                    //
+                    // default:
+                    //
+                    //     if (DEBUG) console.warn("Got Switch " + event.key + ". Not handled.")
 
                 }
             })
@@ -259,7 +343,7 @@ export const useViewportStore = defineStore("scene", {
         INITIALIZE_SCENE() {
             const scene = new Scene();
             scene.background = markRaw(new Color(0xcccccc));
-            scene.fog = markRaw(new FogExp2(0xcccccc, 0.002));
+            // scene.fog = markRaw(new FogExp2(0xcccccc, 0.002));
 
             // // Pyramids
             // this.pyramids = [];
@@ -520,6 +604,7 @@ export const useViewportStore = defineStore("scene", {
 
             // Material
             const material = new PointsMaterial({
+                color: 0xffffff,
                 size: this.point_size,
                 sizeAttenuation: false,
                 vertexColors: true

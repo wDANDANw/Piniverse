@@ -4,7 +4,10 @@
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",
+    "dev": "vue-cli-service serve --mode development",
+    "docker": "vue-cli-service serve --mode docker",
     "build": "vue-cli-service build",
+    "build_docker": "vue-cli-service build --mode production.docker",
     "lint": "vue-cli-service lint"
   },
   "dependencies": {

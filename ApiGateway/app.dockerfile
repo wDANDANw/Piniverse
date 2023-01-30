@@ -1,5 +1,5 @@
 # Use official node image from docker
-FROM node:10
+FROM node:14
 
 # Create application directory
 RUN mkdir -p /usr/src/app
@@ -20,4 +20,4 @@ COPY . /usr/src/app
 EXPOSE 3000
 
 # Run the script to start server
-CMD [ "npm", "run", "start" ]
+CMD [ "npm", "run", "docker" ]

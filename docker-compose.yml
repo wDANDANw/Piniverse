@@ -15,23 +15,7 @@ services:
   #     - "8080:80"
   #endregion
 
-  #region Docker compose for specifically implemented services
-  frontend:
-    build:
-      context: ./FrontendApplication
-    ports:
-      - "8080:8080"
-  preprocessing:
-    build:
-      context: ./Preprocessing
-    environment:
-      - "PYTHONUNBUFFERED=1"
-  model_generator:
-    build:
-      context: ./ModelGenerator
-  #endregion 
-
-  #region Common services
+  #region Common API Servers
   nginx: # External
     build: ./nginx
     ports:
@@ -42,14 +26,45 @@ services:
   api: # Internal
     build:
       context: ./ApiGateway
-      dockerfile: app.dockerfile 
+      dockerfile: app.dockerfile
     environment:
       - "FRONTEND_API=http://frontend:8080"
       - "PREPROCESSING_API=http://preprocessing:5000"
+      - "STORY_ANALYZER_API_GATEWAY=http://open_ai_module:5000"
+      - "MODEL_GENERATOR_API_GATEWAY=http://model_generator:5000"
     depends_on:
       - preprocessing
     ports:
       - "3000:3000"
+
+  #region Services
+  frontend:
+    build:
+      context: ./FrontendApplication
+    ports:
+      - "8080:8080"
+    # environment: => This is defined in .env.docker in frontend folder
+  preprocessing:
+    build:
+      context: ./Preprocessing
+    environment:
+      - "CONFIG_PATH=./appconfigs/docker_settings.py"
+      - "PYTHONUNBUFFERED=1"
+  model_generator:
+    build:
+      context: ./ModelGenerator
+    environment:
+      - "CONFIG_PATH=./appconfigs/docker_settings.py"
+      - "PYTHONUNBUFFERED=1"
+  open_ai_module:
+    build:
+      context: ./OpenAIGenerator
+    environment:
+      - "CONFIG_PATH=./appconfigs/docker_settings.py"
+      - "PYTHONUNBUFFERED=1"
+  #endregion
+
+
   # webhook:
   #   restart: on-failure
   #   build: ./webhook

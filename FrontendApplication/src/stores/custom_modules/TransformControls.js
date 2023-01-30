@@ -3,24 +3,25 @@
 // Example of multi control reference: https://sbcode.net/threejs/multi-controls-example/
 
 import {
-    BoxGeometry,
-    BufferGeometry,
-    CylinderGeometry,
-    DoubleSide,
-    Euler,
-    Float32BufferAttribute,
-    Line,
-    LineBasicMaterial,
-    Matrix4,
-    Mesh,
-    MeshBasicMaterial,
-    Object3D,
-    OctahedronGeometry,
-    PlaneGeometry,
-    Quaternion,
-    Raycaster,
-    SphereGeometry,
-    TorusGeometry,
+    BoxGeometry ,
+    BufferGeometry ,
+    CylinderGeometry ,
+    DoubleSide ,
+    Euler ,
+    Float32BufferAttribute ,
+    Line ,
+    LineBasicMaterial ,
+    Matrix4 ,
+    Mesh ,
+    MeshBasicMaterial ,
+    PointsMaterial ,
+    Object3D ,
+    OctahedronGeometry ,
+    PlaneGeometry ,
+    Quaternion ,
+    Raycaster ,
+    SphereGeometry ,
+    TorusGeometry ,
     Vector3
 } from 'three';
 
@@ -41,6 +42,8 @@ const _mouseUpEvent = { type: 'mouseUp', mode: null };
 const _objectChangeEvent = { type: 'objectChange' };
 
 const _obj_intersections = [];
+
+const PC_HOVER_SCALING_CONST = 2
 
 class TransformControls extends Object3D {
 
@@ -229,6 +232,52 @@ class TransformControls extends Object3D {
 
     }
 
+    highlight_object(hovered) {
+
+        // Emissive Materials
+        if (hovered.material.emissive) {
+            hovered.currentHex = hovered.material.emissive.getHex();
+            hovered.material.emissive.setHex( 0xff0000 );
+        }
+
+        // Point Cloud Materials
+        else if (hovered.material instanceof PointsMaterial) {
+            hovered.material.opacity = 0.5;
+            hovered.material.vertexColors = false;
+            hovered.material.size *= PC_HOVER_SCALING_CONST;
+        }
+
+        else {
+            // Unhandled
+        }
+    }
+
+    remove_highlight_object(hovered) {
+        // Emissive Materials
+        if (hovered.material.emissive) {
+            hovered.material.emissive.setHex( hovered.currentHex );
+        }
+
+        // Point Cloud Materials
+        else if (hovered.material instanceof PointsMaterial) {
+            hovered.material.opacity = 1;
+            hovered.material.vertexColors = true;
+            hovered.material.size /= PC_HOVER_SCALING_CONST;
+        }
+
+        else {
+            // Unhandled
+        }
+    }
+
+    reset_hovered_object(){
+        if ( this._hovered ) {
+            this.remove_highlight_object(this._hovered)
+        }
+
+        this._hovered = null;
+    }
+
     pointerHover( pointer ) {
 
         // if ( this.object === undefined || this.dragging === true ) return;
@@ -257,33 +306,15 @@ class TransformControls extends Object3D {
 
             if ( this._hovered !== object ) {
 
-                if ( this._hovered ) {
-
-                    console.log(typeof (this._hovered.material))
-
-                    // Emissive materials
-                    if (this._hovered.material.emissive) {
-                        this._hovered.material.emissive.setHex( this._hovered.currentHex );
-                    }
-
-                    // Non-emissive materials
-                    else {
-                        console.log("123")
-                    }
-
-                }
-
+                this.reset_hovered_object()
                 this._hovered = obj_intersections[ 0 ].object;
-                this._hovered.currentHex = this._hovered.material.emissive.getHex();
-                this._hovered.material.emissive.setHex( 0xff0000 );
+                this.highlight_object(this._hovered)
 
             }
 
         } else {
 
-            if ( this._hovered ) this._hovered.material.emissive.setHex( this._hovered.currentHex );
-
-            this._hovered = null;
+            this.reset_hovered_object()
 
         }
 
@@ -339,8 +370,7 @@ class TransformControls extends Object3D {
 
             }
 
-            this._hovered.material.emissive.setHex( this._hovered.currentHex );
-            this._hovered = null;
+            this.reset_hovered_object()
         }
 
     }

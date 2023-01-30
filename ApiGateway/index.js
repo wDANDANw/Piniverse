@@ -4,11 +4,11 @@ const cors = require('cors')
 const app = express()
 
 // Get the quotes api from the environment(refer docker-compose.yml)
-// const PREPROCESSING_API_GATEWAY = process.env.PREPROCESSING_API
-const PREPROCESSING_API_GATEWAY = "http://localhost:12334"
-const MODELGENERATOR_API_GATEWAY = "http://localhost:12335"
-const STORY_ANALYZER_API_GATEWAY = "http://localhost:12336"
-const PORT = 12333
+// const PREPROCESSING_API_GATEWAY =
+const PREPROCESSING_API_GATEWAY = process.env.PREPROCESSING_API
+const MODEL_GENERATOR_API_GATEWAY = process.env.MODEL_GENERATOR_API_GATEWAY
+const STORY_ANALYZER_API_GATEWAY = process.env.STORY_ANALYZER_API_GATEWAY
+const PORT = process.env.PORT
 
 // Use CORS to prevent Cross-Origin Requets issue
 app.use(cors())
@@ -73,7 +73,7 @@ app.post('/api/text_to_model', async (req, res) => {
         // TODO: Make this logging a middle ware
         console.log("Calling /api/text_to_mesh")
 
-        const url = MODELGENERATOR_API_GATEWAY + '/api/text_to_model'
+        const url = MODEL_GENERATOR_API_GATEWAY + '/api/text_to_model'
         const data = req.body
         const resolved = await axios.post(url, data)
 
@@ -116,12 +116,19 @@ app.post('/api/story_to_scene', async (req, res) => {
         const logics = JSON.parse(response.data.logics)
 
         // Generate Geometries for Entities
-        const model_generation_url = MODELGENERATOR_API_GATEWAY + '/api/text_to_model';
+        const model_generation_url = MODEL_GENERATOR_API_GATEWAY + '/api/text_to_model';
         let query, geo_res = "";
         for ( const [name, ontologies] of Object.entries(entities) ) {
             query = JSON.stringify([name, ontologies])
+            console.log("Generating geometry for " + query)
             geo_res = await axios.post(model_generation_url, {query: query})
-            entities[name]["Geometry"] = JSON.parse(geo_res.data.geometry)
+            if (geo_res.data.geometry) {
+                entities[name]["Geometry"] = JSON.parse(geo_res.data.geometry)
+                console.log("Generated geometry for " + query)
+            } else {
+                console.log("No valid geometry when trying to generate model for " + query)
+            }
+
         }
 
         // The front end can directly use the objects as they are passed in json
