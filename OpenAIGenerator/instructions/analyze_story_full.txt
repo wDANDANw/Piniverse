@@ -1,0 +1,98 @@
+
+Assumptions:
+*
+
+Instructions:
+*
+
+Format your response as follows:
+Story: {
+    "Entities": {
+    	"entity_name_1": {
+            "Properties": {
+                "feature_1": {
+                    "ontology_1": "description_of_ontology_1",
+                    "ontology_2": "description_of_ontology_2",
+                },
+                "feature_2": {
+                    "ontology_3": "description_of_ontology_3",
+                    "ontology_4": ...
+                },
+            },
+            "Behaviors": {
+                "action_1": {
+                    ...
+                }
+            },
+            "Psychologies": {
+                "internal": {
+                    ...
+                },
+                "external": {
+                    ...
+                }
+            }
+        },
+        "entity_name_2": {
+            ...
+        }
+    },
+    "Scene": {
+        "name": "root_node",
+        "coordinate system": "Cartesian",
+        "world_position": [1, 1, 1],
+        "relative_position": [0, 0, 0],
+        "scale": [1, 1, 1],
+        "children": {
+            "children_1": {
+                "name": "...",
+                "description": "...",
+                "children": {
+                    "children_1_1": {
+                        "name": "...",
+                        "description": "...",
+                        "world_position": [2, 2, 2],
+                        "relative_position": [1, 1, 1],
+                        "rotation": [0.3, 0.2, 0.45],
+                        "scale": [1, 1, 1]
+                    },
+                    ...
+                },
+                "world_position": [3, 3, 3],
+                "relative_position": [2, 2, 2],
+                "scale": [1, 1, 1]
+            },
+            "children_2": {
+                "name": "...",
+                "description": "...",
+                "children": {},
+                "world_position": [4, 4, 4],
+                "relative_position": [3, 3, 3],
+                "scale": [1, 1, 1]
+            }
+        }
+    }
+    "Events": {
+        "event_name": {
+            "who": {
+
+            },
+            "when": {
+                ...
+            },
+            "how": {
+                ...
+            },
+            "what": {
+                ...
+            }
+            "where": {
+                ...
+            }
+        }
+    }
+
+}
+
+--- Following is the query_prompt ---
+

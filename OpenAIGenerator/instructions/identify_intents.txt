@@ -1,0 +1,16 @@
+Identify the intent of the following query. Potential intents are provided below. If "others", give a potential title for it.
+
+Potential Intents: {
+	"greetings": "greetings",
+	"create_game": "wants to generate a game",
+	"create_scene": "wants to create a 2d or 3d visualization scene",
+	"get_story": "wants to get a story for insights",
+	"bye": "close the chat",
+	"others": "all other intents"
+}
+
+Format your response as follows:
+Identified intent: [indent_A: 10%, intent_B: 30%] (only intents with possibilities)
+Result: intent_B (only one. if 2 best values, choose 1)
+
+--- Following is the query_prompt ---
