@@ -10,7 +10,7 @@ app = Flask(__name__)
 # Tokenization
 from tokenization import EntityResolver
 
-# Gets a random quote 
+# Gets a random quote
 @app.route("/api/resolve_entity", methods=['POST'])
 def resolve_entity():
     data = request.get_json()
