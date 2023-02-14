@@ -14,6 +14,7 @@
           <v-textarea
               name="input-7-1"
               label="Input"
+              v-model="input_str"
           ></v-textarea>
           <v-btn
               block
@@ -21,8 +22,11 @@
               outlined
               rounded
               class="mt-5"
+              @click="demo_generate"
           >Generate
           </v-btn>
+          {{"TODO: Make this output prettier"}}
+          <h3 > Output: {{output_str}} </h3>
           <v-btn
               block
               elevation="2"
@@ -52,32 +56,36 @@
         </v-col>
 
       </v-container>
-      <vue3dLoader
-          id="viewer"
-          ref="myViewer"
-          :filePath="filePath"
-          :cameraPosition="{ x: 1, y: -5, z: -20 }"
-          :height="350"
-      />
+      <v-container>
+        <viewport></viewport>
+        <panel></panel>
+      </v-container>
+
     </v-main>
   </v-app>
 
 </template>
 
-
-<script setup>
-import { vue3dLoader } from "vue-3d-loader";
-</script>
-
 <script>
+import axios from "axios"
+const api_gateway = 'http://localhost:3000' // Hardcoded, should use EnvironmentPlugin(['API_GATEWAY'])
+
+import viewPort from "@/components/ViewPort.vue";
+import controlPanel from "@/components/ControlPanel.vue";
 
  export default {
 
    name: 'App',
+   components: {
+     viewport: viewPort,
+     panel: controlPanel,
+   },
    data() {
      return {
        filePath: ['model/teat.dae'],
        files: [],
+       input_str: "",
+       output_str: ""
      }
    },
    methods: {
@@ -91,8 +99,33 @@ import { vue3dLoader } from "vue-3d-loader";
          this.filePath = [temp];
          console.log(this.filePath)
        }
+     },
 
-     }
-   }
+    async demo_generate() {
+      this.output_str = "Generating ..."
+      const resolver_api = "/api/resolve_ner"
+      const url = api_gateway + resolver_api
+      let vm = this
+      await axios.post(url, {input_str: vm.input_str}).then((res) => vm.output_str = JSON.stringify(res.data))
+    }
+  }
  }
 </script>
+
+<style scoped>
+html,
+body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+body {
+  margin: 0px;
+}
+canvas {
+  position: relative;
+}
+#app {
+  height: 100%;
+}
+</style>

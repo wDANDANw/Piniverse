@@ -3,23 +3,21 @@ from spacy import displacy
 from spacy.matcher import DependencyMatcher
 from IPython.display import display, HTML
 
-nlp = spacy.load("en_core_web_sm")
+NER = spacy.load("en_core_web_sm")
 
-'''
 raw_text = "There is four chair red laquer dining set shown in the image. There are opened white french doors leading " \
            "to the outside showing. There is a pool with blue water showing through the french doors of The Indian Space Research Organisation. The pools is " \
-           "surrounded by green shrubbery. The wood floor is covered with white paint."
-'''
-raw_text = "There is a large Audi with two yellow seats in it. Jamie was large. He will be cool. Jamie has a green hat. It is on his head."
-processed_text = nlp(raw_text)
+           "surrounded by green shrubbery.	The wood floor is covered with white paint. "
+
+processed_text = NER(raw_text)
 
 
 #for word in processed_text.ents:
 #    print(word.text, word.label_)
 
-for word in processed_text:
-    print(word.lemma_, word.pos_, word.tag_, word.dep_,
-            word.shape_, word.is_alpha, word.is_stop, word.head.lemma_)
+#for word in processed_text:
+#    print(word.lemma_, word.pos_, word.tag_, word.dep_,
+#            word.shape_, word.is_alpha, word.is_stop, word.head.lemma_)
 
 #displacy.serve(processed_text, style="ent")
 
@@ -182,3 +180,7 @@ for link in all_links:
           link['cluster'] = idx
 print(nouns)
 '''
+
+def get_ner(text):
+    processed = NER(text)
+    return [(word.text, word.label_) for word in processed.ents]

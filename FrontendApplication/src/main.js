@@ -2,10 +2,14 @@ import {createApp} from "vue";
 import App from './App.vue'
 import vuetify from './plugins/vuetify'
 import { loadFonts } from './plugins/webfontloader'
-import { TroisJSVuePlugin } from 'troisjs';
+
+import { createPinia } from "pinia";
 
 loadFonts()
 
-createApp(App)
-  .use(vuetify, TroisJSVuePlugin)
-  .mount('#app')
+const app = createApp(App)
+
+app.use(createPinia())
+app.use(vuetify)
+
+app.mount("#app")
