@@ -3,21 +3,25 @@ from spacy import displacy
 from spacy.matcher import DependencyMatcher
 from IPython.display import display, HTML
 
-NER = spacy.load("en_core_web_sm")
+nlp = spacy.load("en_core_web_sm")
 
+'''
 raw_text = "There is four chair red laquer dining set shown in the image. There are opened white french doors leading " \
            "to the outside showing. There is a pool with blue water showing through the french doors of The Indian Space Research Organisation. The pools is " \
            "surrounded by green shrubbery.	The wood floor is covered with white paint. "
-
-processed_text = NER(raw_text)
+'''
+raw_text = "There is a large Audi. The Audi has two yellow seats in it. Jamie owns the audi. Jamie was large. He will be cool." \
+           "Jamie has a green hat. It is on his head. The thing on his head is tall. A mouse is in the hat. It proceeds with haste." \
+           "A nearby tree is tall."
+processed_text = nlp(raw_text)
 
 
 #for word in processed_text.ents:
 #    print(word.text, word.label_)
 
-#for word in processed_text:
-#    print(word.lemma_, word.pos_, word.tag_, word.dep_,
-#            word.shape_, word.is_alpha, word.is_stop, word.head.lemma_)
+for word in processed_text:
+    print(word.lemma_, word.pos_, word.tag_, word.dep_,
+            word.shape_, word.is_alpha, word.is_stop, word.head.lemma_)
 
 #displacy.serve(processed_text, style="ent")
 
@@ -51,7 +55,7 @@ print(all_clusters) #And finally, this shows all coreferences
 
 # Dependency Matching
 
-#From https://stackoverflow.com/questions/67821137/spacy-how-to-get-all-words-that-describe-a-noun
+# Modified from https://stackoverflow.com/questions/67821137/spacy-how-to-get-all-words-that-describe-a-noun
 pattern_direct_modifier = [  # Adjectives that directly modify a noun, eg. "the red chair"
   {
     "RIGHT_ID": "target",
@@ -64,20 +68,6 @@ pattern_direct_modifier = [  # Adjectives that directly modify a noun, eg. "the 
     "RIGHT_ATTRS": {"DEP": {"IN": ["amod", "nummod"]}}
   },
 ]
-
-# ^ but in the opposite direction:
-'''
-{
-    "RIGHT_ID": "target",
-    "RIGHT_ATTRS": {"DEP": {"IN": ["amod", "nummod"]}}
-  },
-  {
-    "LEFT_ID": "target",
-    "REL_OP": "<",
-    "RIGHT_ID": "modifier",
-    "RIGHT_ATTRS": {"POS": "NOUN"}
-  },
-  '''
 
 pattern_is_modifier = [  # Adjectives that indirectly modify a noun through the verb "is" (lemma "be"), eg. "the chair is red"
   {
@@ -103,6 +93,71 @@ pattern_is_modifier = [  # Adjectives that indirectly modify a noun through the 
     "RIGHT_ATTRS": {
       "POS": {"IN": ["ADJ"]},
       "DEP": {"IN": ["acomp"]}
+    }
+  },
+]
+
+pattern_prepositional_relation_is = [  # "the cat is in the tree"
+  {
+    "RIGHT_ID": "is",
+    "RIGHT_ATTRS": {
+      "POS": {"IN": ["VERB", "AUX"]},
+      "LEMMA": "be"
+    }
+  },
+  {
+    "LEFT_ID": "is",
+    "REL_OP": ">",
+    "RIGHT_ID": "noun",
+    "RIGHT_ATTRS": {
+      "POS": {"IN": ["NOUN","PRON","PROPN"]},
+      #"DEP": {"IN": ["nsubj"]}
+    }
+  },
+  {
+    "LEFT_ID": "is",
+    "REL_OP": ">",
+    "RIGHT_ID": "prep",
+    "RIGHT_ATTRS": {
+      "POS": {"IN": ["ADP"]},
+      #"DEP": {"IN": ["prep"]}
+    }
+  },
+  {
+    "LEFT_ID": "prep",
+    "REL_OP": ">",
+    "RIGHT_ID": "subj",
+    "RIGHT_ATTRS": {
+      "POS": {"IN": ["NOUN","PRON","PROPN"]},
+      #"DEP": {"IN": ["pobj"]}
+    }
+  },
+]
+
+pattern_prepositional_relation_direct = [  # "the cat in the tree (...is orange, etc.)"
+  {
+    "RIGHT_ID": "noun",
+    "RIGHT_ATTRS": {
+      "POS": {"IN": ["NOUN","PRON","PROPN"]},
+      #"DEP": {"IN": ["nsubj"]}
+    }
+  },
+  {
+    "LEFT_ID": "noun",
+    "REL_OP": ">",
+    "RIGHT_ID": "prep",
+    "RIGHT_ATTRS": {
+      "POS": {"IN": ["ADP"]},
+      #"DEP": {"IN": ["prep"]}
+    }
+  },
+  {
+    "LEFT_ID": "prep",
+    "REL_OP": ">",
+    "RIGHT_ID": "subj",
+    "RIGHT_ATTRS": {
+      "POS": {"IN": ["NOUN","PRON","PROPN"]},
+      #"DEP": {"IN": ["pobj"]}
     }
   },
 ]
@@ -142,7 +197,8 @@ def append_noun(noun_obj): # Link coreference resolution with dependency matchin
         return
   entities.append({
     "nouns": [noun_obj["noun"]], #TODO: Capitalize proper nouns and uncapitalize improper nouns regardless of their current capitalization (not sure where to put this TODO specifically)
-    "adjectives": [noun_obj["adj"]]
+    "adjectives": [noun_obj["adj"]],
+    "relations": []  # Will be filled in later when prepositions are parsed
   })
 
 
@@ -162,6 +218,53 @@ for match_type_id, match_items in matches:
     })
 print(entities)
 
+# TODO: Add all non-described nouns to the entities list here
+
+
+
+print("Prepositions:")
+prep_relations = []
+preposition_matcher = DependencyMatcher(nlp.vocab)
+preposition_matcher.add("PREPOSITION_IS", [pattern_prepositional_relation_is])
+preposition_matcher.add("PREPOSITION_DIRECT", [pattern_prepositional_relation_direct])
+matches = preposition_matcher(processed_text)
+
+def append_prep(noun, prep, subj):
+  print('Match:', noun, prep, subj)
+  prep_relations.append({
+    "noun": noun,
+    "prep": prep,
+    "subj": subj,
+  })
+
+for match_type_id, match_items in matches:
+  if len(match_items) == 3:  # "noun prep noun"
+    append_prep(doc[match_items[0]], doc[match_items[1]], doc[match_items[2]])
+  elif len(match_items) == 4:  # "noun is prep noun"
+    append_prep(doc[match_items[1]], doc[match_items[2]], doc[match_items[3]])
+print(prep_relations)
+
+for relation in prep_relations:
+  for entity in entities:
+    if relation["noun"] in entity["nouns"]:  # If the relation refers to the entity as its source noun
+      print(entity, relation)
+      for target_entity in entities:
+        if relation["subj"] in target_entity["nouns"]:
+          entity["relations"].append({
+            "prep": relation["prep"],
+            "entity": relation["subj"]
+          })
+
+
+
+
+# TODOS:
+#  - Large noun chunks that contain other nouns appearing in dependency matching and screwing things up
+#    - Solution: Only consider two nouns to be in the same chunk if the tokens match the PRIMARY nouns of phrases in that chunk (eg. Audi, not seats)
+#  - Only nouns with an associated adjective appear in the entities array, so if they aren't described then they can't have relationships
+#    - Solution: Go back over all nouns and add them to the array if they don't exist after parsing all adjective relationships
+#  - Entity nouns also only appear in the array if they are being used to describe the entity
+#    - Solution: Transfer unused primary nouns from clusters to entities (honestly should probably build the entities array off of the clusters directly... whoops)
 
 '''
 nouns = []
@@ -182,5 +285,5 @@ print(nouns)
 '''
 
 def get_ner(text):
-    processed = NER(text)
+    processed = nlp(text)
     return [(word.text, word.label_) for word in processed.ents]

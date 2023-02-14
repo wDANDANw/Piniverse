@@ -35,7 +35,7 @@ def resolve_ner():
 
     return jsonify({"input": data, "output": output})
 
-# 404 Erorr for unknown routes
+# 404 Error for unknown routes
 @app.errorhandler(404)
 def page_not_found(e):
     return jsonify({"message": "Resource not found"}), 404
