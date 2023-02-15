@@ -13,6 +13,9 @@ from tokenization import EntityResolver
 # NER
 from ner import get_ner
 
+# Entity parsing
+from ner import parse_entities
+
 # Gets a random quote 
 @app.route("/api/resolve_entity", methods=['POST'])
 def resolve_entity():
@@ -32,6 +35,18 @@ def resolve_ner():
     output = get_ner(input_str)
 
     print(output)
+
+    return jsonify({"input": data, "output": output})
+
+# Route to fully parse text into entities
+@app.route("/api/parse_text_to_entities", methods=['POST'])
+def parse_text_to_entities():
+    data = request.get_json()
+    input_str = data["input_str"]
+    print("Processing entity parsing request: ", input_str)
+    output = parse_entities(input_str)
+
+    print("Entities parsed: ", output)
 
     return jsonify({"input": data, "output": output})
 
