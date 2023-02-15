@@ -12,7 +12,7 @@ raw_text = "There is four chair red laquer dining set shown in the image. There 
 '''
 raw_text = "There is a large Audi. The Audi has two yellow seats in it. Jamie owns the audi. Jamie was large. He will be cool." \
            "Jamie has a green hat. It is on his head. The thing on his head is tall. A mouse is in the hat. It proceeds with haste." \
-           "A nearby tree is tall."
+           "A nearby tree is tall. Rock."
 processed_text = nlp(raw_text)
 
 
@@ -175,7 +175,7 @@ entities = []
 def cluster_contains(cluster, test_token):
   for phrase in cluster:
     for token in phrase:
-      if token == test_token:
+      if token == test_token and test_token.head not in phrase:  # Only consider the primary nouns of a phrase to be in the cluster
         return True
   return False
 
@@ -247,7 +247,7 @@ for relation in prep_relations:
     if relation["noun"] in entity["nouns"]:  # If the relation refers to the entity as its source noun
       print(entity, relation)
       for target_entity in entities:
-        if relation["subj"] in target_entity["nouns"]:
+        if relation["subj"] in target_entity["nouns"]:  # TODO: What if no matching nouns are found?
           entity["relations"].append({
             "prep": relation["prep"],
             "entity": relation["subj"]
@@ -259,10 +259,6 @@ for relation in prep_relations:
 # TODOS:
 #  - Large noun chunks that contain other nouns appearing in dependency matching and screwing things up
 #    - Solution: Only consider two nouns to be in the same chunk if the tokens match the PRIMARY nouns of phrases in that chunk (eg. Audi, not seats)
-#  - Only nouns with an associated adjective appear in the entities array, so if they aren't described then they can't have relationships
-#    - Solution: Go back over all nouns and add them to the array if they don't exist after parsing all adjective relationships
-#  - Entity nouns also only appear in the array if they are being used to describe the entity
-#    - Solution: Transfer unused primary nouns from clusters to entities (honestly should probably build the entities array off of the clusters directly... whoops)
 
 '''
 nouns = []
@@ -282,6 +278,7 @@ for link in all_links:
 print(nouns)
 '''
 
+# Utility function used by main.py
 def get_ner(text):
     processed = nlp(text)
     return [(word.text, word.label_) for word in processed.ents]
