@@ -185,40 +185,38 @@ def share_cluster(token1, token2):
       return True
   return False
 
-def append_noun(noun_obj): # Link coreference resolution with dependency matching in this function; TODO: Just pass in noun and adjective separately
+def append_noun_and_adjs(input_noun, input_adjs):  # Link coreference resolution with dependency matching in this function; TODO: Just pass in noun and adjective separately
   for entity in entities:
     for noun in entity["nouns"]:
-      if noun_obj["noun"] == noun:
-        entity["adjectives"].append(noun_obj["adj"])
+      if input_noun == noun:
+        entity["adjectives"].extend(input_adjs)
         return
-      elif share_cluster(noun_obj["noun"], noun):
-        entity["nouns"].append(noun_obj["noun"])
-        entity["adjectives"].append(noun_obj["adj"])
+      elif share_cluster(input_noun, noun):
+        entity["nouns"].append(input_noun)
+        entity["adjectives"].extend(input_adjs)
         return
   entities.append({
-    "nouns": [noun_obj["noun"]], #TODO: Capitalize proper nouns and uncapitalize improper nouns regardless of their current capitalization (not sure where to put this TODO specifically)
-    "adjectives": [noun_obj["adj"]],
+    "nouns": [input_noun],  #TODO: Capitalize proper nouns and uncapitalize improper nouns regardless of their current capitalization (here? probably not, probably as the data leaves the backend / parse function?)
+    "adjectives": input_adjs,
     "relations": []  # Will be filled in later when prepositions are parsed
   })
 
 
 
+# Build an entity list from all nouns and their associated adjectives
 for match_type_id, match_items in matches:
   if len(match_items) == 2:
     print('Match:', doc[match_items[1]], doc[match_items[0]])
-    append_noun({
-      "noun": doc[match_items[0]],
-      "adj": doc[match_items[1]]
-    })
+    append_noun_and_adjs(doc[match_items[0]], [doc[match_items[1]]])
   elif len(match_items) == 3:
     print('Match:', doc[match_items[2]], doc[match_items[1]])
-    append_noun({
-      "noun": doc[match_items[1]],
-      "adj": doc[match_items[2]]
-    })
-print(entities)
+    append_noun_and_adjs(doc[match_items[1]], [doc[match_items[2]]])
 
-# TODO: Add all non-described nouns to the entities list here
+# Add all nouns that don't have any associated adjectives
+for word in processed_text:
+  if word.pos_ in ["NOUN","PRON","PROPN"]:
+    append_noun_and_adjs(word, [])
+print(entities)
 
 
 
