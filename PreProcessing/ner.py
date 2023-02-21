@@ -1,10 +1,17 @@
-old_text = "There is four chair red laquer dining set shown in the image. There are opened white french doors leading " \
-           "to the outside showing. There is a pool with blue water showing through the french doors of The Indian Space Research Organisation. The pools is " \
-           "surrounded by green shrubbery.	The wood floor is covered with white paint. "
+# Assorted text inputs, for testing
+texts = [
+  "There is four chair red laquer dining set shown in the image. There are opened white french doors leading " \
+  "to the outside showing. There is a pool with blue water showing through the french doors of The Indian Space Research Organisation. The pools is " \
+  "surrounded by green shrubbery.	The wood floor is covered with white paint. ",
 
-raw_text = "There is a large Audi. The Audi has two yellow seats in it. Jamie owns the audi. Jamie was large. He will be cool." \
-           "Jamie has a green hat. It is on his head. The thing on his head is tall. A mouse is in the hat. It proceeds with haste." \
-           "A nearby tree is tall. Rock."
+  "There is a large Audi. The Audi has two yellow seats in it. Jamie owns the audi. Jamie was large. He will be cool. " \
+  "Jamie has a green hat. It is on his head. The thing on his head is tall. A mouse is in the hat. It proceeds to jump hastily. " \
+  "A nearby tree is tall. Rock.",
+
+  "the walls are stark white, except for occasional splatters of colorful paint. The entire floor is a ball pit, filled up to at least a foot. There is a door at one end of the room, and a window on the other side with metal prison bars on it.",
+
+  "A tan room with a large rectangular window containing two wooden desks with monitors in the top right and bottom right corner. There's a closet contained towards the top left corner with the door in the bottom left corner. The floor has carpet and there's a printer on top of a filing cabinet in the top middle of the room.",
+]
 
 import spacy
 from spacy.matcher import DependencyMatcher
@@ -27,9 +34,12 @@ def parse_entities(raw_text, nlp, predictor):
   processed_text = nlp(raw_text)
   pred = predictor.predict(document=raw_text)
 
-  #for word in processed_text:
-  #    print(word.lemma_, word.pos_, word.tag_, word.dep_,
-  #            word.shape_, word.is_alpha, word.is_stop, word.head.lemma_)
+  print("")
+  print("----------")
+  print("")
+  for word in processed_text:
+      print(word.lemma_, word.pos_, word.tag_, word.dep_,
+              word.shape_, word.is_alpha, word.is_stop, word.head.lemma_)
 
 
 
@@ -46,7 +56,7 @@ def parse_entities(raw_text, nlp, predictor):
           obj = cur_cluster[j]  # obj = [27,31] for example - start/end of each reference
           for num in range((obj[0]), (obj[1]+1)):
               all_clusters[i][j].append(processed_text[num])
-  print(all_clusters) #And finally, this shows all coreferences
+  #print(all_clusters) #And finally, this shows all coreferences
   #print(pred['clusters']) #Original cluster numbers for comparison, if needed
 
 
@@ -109,7 +119,7 @@ def parse_entities(raw_text, nlp, predictor):
       "RIGHT_ID": "noun",
       "RIGHT_ATTRS": {
         "POS": {"IN": ["NOUN","PRON","PROPN"]},
-        #"DEP": {"IN": ["nsubj"]}
+        "DEP": {"IN": ["nsubj"]}
       }
     },
     {
@@ -118,7 +128,7 @@ def parse_entities(raw_text, nlp, predictor):
       "RIGHT_ID": "prep",
       "RIGHT_ATTRS": {
         "POS": {"IN": ["ADP"]},
-        #"DEP": {"IN": ["prep"]}
+        "DEP": {"IN": ["prep"]}
       }
     },
     {
@@ -127,7 +137,7 @@ def parse_entities(raw_text, nlp, predictor):
       "RIGHT_ID": "subj",
       "RIGHT_ATTRS": {
         "POS": {"IN": ["NOUN","PRON","PROPN"]},
-        #"DEP": {"IN": ["pobj"]}
+        "DEP": {"IN": ["pobj"]}
       }
     },
   ]
@@ -137,7 +147,7 @@ def parse_entities(raw_text, nlp, predictor):
       "RIGHT_ID": "noun",
       "RIGHT_ATTRS": {
         "POS": {"IN": ["NOUN","PRON","PROPN"]},
-        #"DEP": {"IN": ["nsubj"]}
+        "DEP": {"IN": ["nsubj"]}
       }
     },
     {
@@ -146,7 +156,7 @@ def parse_entities(raw_text, nlp, predictor):
       "RIGHT_ID": "prep",
       "RIGHT_ATTRS": {
         "POS": {"IN": ["ADP"]},
-        #"DEP": {"IN": ["prep"]}
+        "DEP": {"IN": ["prep"]}
       }
     },
     {
@@ -155,7 +165,7 @@ def parse_entities(raw_text, nlp, predictor):
       "RIGHT_ID": "subj",
       "RIGHT_ATTRS": {
         "POS": {"IN": ["NOUN","PRON","PROPN"]},
-        #"DEP": {"IN": ["pobj"]}
+        "DEP": {"IN": ["pobj"]}
       }
     },
   ]
@@ -204,21 +214,21 @@ def parse_entities(raw_text, nlp, predictor):
   # Build an entity list from all nouns and their associated adjectives
   for match_type_id, match_items in matches:
     if len(match_items) == 2:
-      print('Match:', doc[match_items[1]], doc[match_items[0]])
+      #print('Match:', doc[match_items[1]], doc[match_items[0]])
       append_noun_and_adjs(doc[match_items[0]], [doc[match_items[1]]])
     elif len(match_items) == 3:
-      print('Match:', doc[match_items[2]], doc[match_items[1]])
+      #print('Match:', doc[match_items[2]], doc[match_items[1]])
       append_noun_and_adjs(doc[match_items[1]], [doc[match_items[2]]])
 
   # Add all nouns that don't have any associated adjectives
   for word in processed_text:
     if word.pos_ in ["NOUN","PRON","PROPN"]:
       append_noun_and_adjs(word, [])
-  print(entities)
+  #print(entities)
 
 
 
-  print("Prepositions:")
+  #print("Prepositions:")
   prep_relations = []
   preposition_matcher = DependencyMatcher(nlp.vocab)
   preposition_matcher.add("PREPOSITION_IS", [pattern_prepositional_relation_is])
@@ -226,7 +236,7 @@ def parse_entities(raw_text, nlp, predictor):
   matches = preposition_matcher(processed_text)
 
   def append_prep(noun, prep, subj):
-    print('Match:', noun, prep, subj)
+    #print('Match:', noun, prep, subj)
     prep_relations.append({
       "noun": noun,
       "prep": prep,
@@ -238,7 +248,7 @@ def parse_entities(raw_text, nlp, predictor):
       append_prep(doc[match_items[0]], doc[match_items[1]], doc[match_items[2]])
     elif len(match_items) == 4:  # "noun is prep noun"
       append_prep(doc[match_items[1]], doc[match_items[2]], doc[match_items[3]])
-  print(prep_relations)
+  #print(prep_relations)
 
   for relation in prep_relations:
     for entity in entities:
@@ -249,8 +259,31 @@ def parse_entities(raw_text, nlp, predictor):
               "prep": relation["prep"],
               "entity": relation["subj"]
             })
-  print(entities)
+  #print(entities)
 
   return entities
 
-parse_entities(raw_text, nlp, predictor)
+# Tests to run when running this file alone
+test_txt = texts[1]
+entities = parse_entities(test_txt, nlp, predictor)
+print("")
+print(test_txt)
+print("")
+for entity in entities:
+
+  if(len(entity["nouns"]) > 0):
+    print("Nouns:")
+    for noun in entity["nouns"]:
+      print("  ", noun)
+
+  if(len(entity["adjectives"]) > 0):
+    print("Adjectives:")
+    for adj in entity["adjectives"]:
+      print("  ", adj)
+
+  if(len(entity["relations"]) > 0):
+    print("Relationships:")
+    for rel in entity["relations"]:
+      print("  ", rel["prep"], rel["entity"])
+
+  print("")
