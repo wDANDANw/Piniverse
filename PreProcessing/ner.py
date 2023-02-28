@@ -1,18 +1,3 @@
-# Assorted text inputs, for testing
-texts = [
-  "There is four chair red laquer dining set shown in the image. There are opened white french doors leading " \
-  "to the outside showing. There is a pool with blue water showing through the french doors of The Indian Space Research Organisation. The pools is " \
-  "surrounded by green shrubbery.	The wood floor is covered with white paint. ",
-
-  "There is a large Audi. The Audi has two yellow seats in it. Jamie owns the audi. Jamie was large. He will be cool. " \
-  "Jamie has a green hat. It is on his head. The thing on his head is tall. A mouse is in the hat. It proceeds to jump hastily. " \
-  "A nearby tree is tall. Rock.",
-
-  "the walls are stark white, except for occasional splatters of colorful paint. The entire floor is a ball pit, filled up to at least a foot. There is a door at one end of the room, and a window on the other side with metal prison bars on it.",
-
-  "A tan room with a large rectangular window containing two wooden desks with monitors in the top right and bottom right corner. There's a closet contained towards the top left corner with the door in the bottom left corner. The floor has carpet and there's a printer on top of a filing cabinet in the top middle of the room.",
-]
-
 import spacy
 from spacy.matcher import DependencyMatcher
 nlp = spacy.load("en_core_web_sm")
@@ -263,27 +248,8 @@ def parse_entities(raw_text, nlp, predictor):
 
   return entities
 
-# Tests to run when running this file alone
-test_txt = texts[1]
-entities = parse_entities(test_txt, nlp, predictor)
-print("")
-print(test_txt)
-print("")
-for entity in entities:
 
-  if(len(entity["nouns"]) > 0):
-    print("Nouns:")
-    for noun in entity["nouns"]:
-      print("  ", noun)
-
-  if(len(entity["adjectives"]) > 0):
-    print("Adjectives:")
-    for adj in entity["adjectives"]:
-      print("  ", adj)
-
-  if(len(entity["relations"]) > 0):
-    print("Relationships:")
-    for rel in entity["relations"]:
-      print("  ", rel["prep"], rel["entity"])
-
-  print("")
+# Use the imported nlp and predictor functions here so that outside modules don't have to re-import them
+# and pass them into the parsing function themselves (but still allow this through the old parse_entities function)
+def parse_entities_standalone(text):
+  return parse_entities(text, nlp, predictor)
