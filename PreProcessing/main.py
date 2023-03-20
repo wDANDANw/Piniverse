@@ -1,5 +1,4 @@
 # Main.py for Preprocessing Module
-import os
 
 # Server
 from flask import Flask
@@ -14,12 +13,10 @@ from tokenization import EntityResolver
 # NER
 from ner import get_ner
 
-# Environment
-app.config.from_object("default_settings")
-app.config.from_envvar('CONFIG_PATH',silent=True)
-print("Using Config: " + os.environ.get("CONFIG_PATH", default="default_settings"))
+# Entity parsing
+from ner import parse_entities_standalone
 
-# Gets a random quote 
+# Gets a random quote
 @app.route("/api/resolve_entity", methods=['POST'])
 def resolve_entity():
     data = request.get_json()
@@ -41,11 +38,23 @@ def resolve_ner():
 
     return jsonify({"input": data, "output": output})
 
-# 404 Erorr for unknown routes
+# Route to fully parse text into entities
+@app.route("/api/parse_text_to_entities", methods=['POST'])
+def parse_text_to_entities():
+    data = request.get_json()
+    input_str = data["input_str"]
+    print("Processing entity parsing request: ", input_str)
+    output = parse_entities_standalone(input_str)
+
+    print("Entities parsed: ", output)
+
+    return jsonify({"input": data, "output": output})
+
+# 404 Error for unknown routes
 @app.errorhandler(404)
 def page_not_found(e):
     return jsonify({"message": "Resource not found"}), 404
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=app.config["PORT"], debug=True) # run application
+    app.run(host='0.0.0.0', port=5000, debug=True) # run application
     
