@@ -28,12 +28,12 @@ class SceneObject:
     size = []
     location = []
 
-# Get the location of trajector and the landmark. This function assumes that trajector and landmark are SceneObjects that consists of 
+# Get the location of trajector and the landmark. This function assumes that trajector and landmark are SceneObjects that consists of
 # a size and a location
 # size (w, h, l)
 # loc  (x, y, z)
 def get_loc(trajector, spatial_indicator, landmark):
-    
+
     # Initialize the Trajector
     Trajector = SceneObject()
     Trajector.size = [1,1,1]
@@ -127,3 +127,65 @@ print("The Spatial Indicator: " + str(get_spatial_indicator(rel_ents[0])))
 print("The Landmark: ", get_landmark(rel_ents[0]))
 
 get_loc(get_trajector(rel_ents[0]), get_spatial_indicator(rel_ents[0]), get_landmark(rel_ents[0]))
+
+'''
+def add_neighbors(boundary, entity):
+    return boundary  # TODO
+
+def remove_entity(boundary, entity):
+    return boundary  # TODO
+
+def get_rel_pos(entity, parent):
+    return parent["position"]  # TODO
+
+def fill_out_locations(entities):
+    if len(entities) == 0: return entities
+    cur_ent = entities[0]
+    cur_ent["position"] = [0,0,0]
+    boundary = add_neighbors([], cur_ent)
+    while(len(boundary) > 0):
+        cur_ent = boundary[0][0]
+        parent = boundary[0][1]
+        cur_ent["position"] = get_rel_pos(cur_ent, parent)
+        boundary = remove_entity(boundary, cur_ent)
+        boundary = add_neighbors(boundary, cur_ent)
+'''
+
+def get_rel_pos(parent, entity, prep):
+    print(parent["position"])
+    return parent["position"]  # TODO
+
+def get_entity(noun, entities):
+    for entity in entities:
+        if noun in entity["nouns"]:
+            return entity
+    print('Fatal error: No entity found for the given noun')
+    return False
+
+def fill_out_child_locations(entity, entities):
+    for rel in entity["relations"]:
+        prep = rel["prep"]
+        target = get_entity(rel["entity"], entities)
+        if("position" not in target.keys()):
+            target["position"] = get_rel_pos(entity, target, prep)
+            fill_out_child_locations(target, entities)
+
+def get_first_unpositioned_entity_index(entities):
+    for idx, entity in enumerate(entities):
+        if("position" not in entity.keys()):
+            return idx
+    return -1
+
+def fill_out_all_locations(entities):
+    while(True):
+        idx = get_first_unpositioned_entity_index(entities)
+        if(idx == -1):
+            return True
+        else:
+            entities[idx]["position"] = [0,0,0]
+            fill_out_child_locations(entities[idx], entities)
+
+print("entity positioning test")
+print(entities)
+fill_out_all_locations(entities)
+print(entities)
