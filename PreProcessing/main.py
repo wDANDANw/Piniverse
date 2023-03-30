@@ -41,6 +41,7 @@ def resolve_ner():
 # Route to fully parse text into entities
 @app.route("/api/parse_text_to_entities", methods=['POST'])
 def parse_text_to_entities():
+    print("parsing")  # TODO
     data = request.get_json()
     input_str = data["input_str"]
     print("Processing entity parsing request: ", input_str)
@@ -48,13 +49,22 @@ def parse_text_to_entities():
 
     print("Entities parsed: ", output)
 
-    return jsonify({"input": data, "output": output})
+    return jsonify({"input": data, "output": ["testing"]}) # TODO: replace testing array with "output"
 
 # 404 Error for unknown routes
 @app.errorhandler(404)
 def page_not_found(e):
     return jsonify({"message": "Resource not found"}), 404
 
+#TODO: Temporary, for testing
+'''
+# 500 general-purpose error handler
+@app.errorhandler(500)
+def unknown_error(e):
+    print("500 error encountered")
+    return jsonify({"message": "Unknown internal error occurred"}), 500
+'''
+
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True) # run application
+    app.run(host='0.0.0.0', port=12334, debug=True) # run application #TODO: Changed port from 5000 to 12334 manually. may cause unexpected behavior
     

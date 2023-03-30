@@ -29,7 +29,7 @@ services:
       dockerfile: app.dockerfile
     environment:
       - "FRONTEND_API=http://frontend:8080"
-      - "PREPROCESSING_API=http://preprocessing:5000"
+      - "PREPROCESSING_API_GATEWAY=http://preprocessing:5000"
       - "STORY_ANALYZER_API_GATEWAY=http://open_ai_module:5000"
       - "MODEL_GENERATOR_API_GATEWAY=http://model_generator:5000"
     depends_on:

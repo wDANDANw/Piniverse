@@ -5,12 +5,12 @@ const app = express()
 
 // Get the quotes api from the environment(refer docker-compose.yml)
 // const PREPROCESSING_API_GATEWAY =
-const PREPROCESSING_API_GATEWAY = process.env.PREPROCESSING_API
+const PREPROCESSING_API_GATEWAY = process.env.PREPROCESSING_API_GATEWAY
 const MODEL_GENERATOR_API_GATEWAY = process.env.MODEL_GENERATOR_API_GATEWAY
 const STORY_ANALYZER_API_GATEWAY = process.env.STORY_ANALYZER_API_GATEWAY
 const PORT = process.env.PORT
 
-// Use CORS to prevent Cross-Origin Requets issue
+// Use CORS to prevent Cross-Origin Requests issue
 app.use(cors())
 app.use(express.json());
 
@@ -44,7 +44,7 @@ app.post('/api/resolve_entity', async (req, res) => {
 app.post('/api/resolve_ner', async (req, res) => {
     try {
         // TODO: Make this a middleware
-        console.log("Callling /api/resolve_ner")
+        console.log("Calling /api/resolve_ner")
 
         const url = PREPROCESSING_API_GATEWAY + '/api/resolve_ner'
         const data = req.body
@@ -70,21 +70,30 @@ app.post('/api/resolve_ner', async (req, res) => {
 app.post('/api/parse_text_to_entities', async (req, res) => {
     try {
         // TODO: Make this a middleware
-        console.log("Callling /api/parse_text_to_entities")
+        console.log("Calling /api/parse_text_to_entities")
 
         const url = PREPROCESSING_API_GATEWAY + '/api/parse_text_to_entities'
         const data = req.body
+        console.log(url) //TODO: Remove several logging statements added during debug
+        console.log(data)
         const resolved = await axios.post(url, data)
 
-        console.log(resolved)
+        console.log(resolved.data)
+        console.log({
+            time: Date.now(),
+            input: resolved.data.input,
+            output: resolved.data.output
+        })
 
+        res.status(200)
         return res.json({
             time: Date.now(),
             input: resolved.data.input,
             output: resolved.data.output
         })
     } catch (error) {
-        // console.log(error)
+        console.log(error)
+        console.log(error.response.data) //TODO: Temp
         res.status(500)
         return res.json({
             message: "Internal server error",
@@ -111,7 +120,7 @@ app.post('/api/text_to_model', async (req, res) => {
             geometry: resolved.data.geometry
         })
     } catch (error) {
-        // console.log(error)
+        console.log(error)
         res.status(500)
         return res.json({
             message: "Internal server error",
