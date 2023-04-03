@@ -1,5 +1,5 @@
 # Select official python 3 runtime
-FROM python:3.6
+FROM python:3.9
 
 # Creates a directory in /usr/src/app
 RUN mkdir -p /usr/src/app

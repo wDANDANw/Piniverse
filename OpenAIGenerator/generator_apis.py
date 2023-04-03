@@ -1,7 +1,7 @@
 # Open AI
 import openai
 # openai.api_key = os.getenv("OPENAI_API_KEY")
-openai.api_key = "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"
+openai.api_key = "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"
 
 # Logging related
 from datetime import datetime

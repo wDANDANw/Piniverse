@@ -20,6 +20,7 @@ import {
     Vector3 ,
     WebGLRenderer ,
 } from "three";
+import * as THREE from "three";
 
 // Point Cloud Related
 import {
@@ -44,6 +45,8 @@ const DEBUG = true
 
 // Entity Related
 import { Entity, useEntityStore } from "@/stores/entity";
+import {getState} from "core-js/modules/web.url-search-params.constructor";
+import scene from "three/addons/offscreen/scene";
 
 
 // TODO: Reorganize the order of functions
@@ -69,6 +72,7 @@ export const useViewportStore = defineStore("scene", {
             bounding_boxes: markRaw({}),
             entities: markRaw([]),
             stats: null,
+            modelLines: [],
         };
     },
     getters: {
@@ -615,7 +619,18 @@ export const useViewportStore = defineStore("scene", {
             // Return Point Cloud Object
             return new Points(object_geometry, material);
         },
-
+        PUSH_POINTS(x, y, z){
+            scene.modelLines.push(new THREE.Vector3(x, y, z));
+        },
+        SHOW_LINES(){
+            for (let i = 0; i < scene.modelLines.length; i++) {
+                const geometry = new THREE.BufferGeometry().setFromPoints(scene.modelLines[i]);
+                const material = new THREE.LineBasicMaterial({color: 0xff0000});
+                const line = new THREE.Line(geometry, material);
+                scene.add(line);
+            }
+            this.RENDER();
+        }
 
 
     },
