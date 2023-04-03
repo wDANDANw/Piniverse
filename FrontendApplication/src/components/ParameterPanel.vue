@@ -13,7 +13,7 @@
         outlined
         rounded
         class="mt-5"
-        @click="analysis_sentence"
+        @click="send_query"
         style="font-family: 'Comic Sans MS', serif"
     >Generate
     </v-btn>
@@ -45,6 +45,7 @@ const api_gateway = process.env.VUE_APP_API_SERVER_GATEWAY
 // Viewport related
 import { mapActions } from 'pinia'
 import { useEntityStore } from "@/stores/entity";
+//import * as querystring from "querystring";
 //import { utils } from "@/utils/utils";
 
 // CONSTANTS
@@ -69,28 +70,36 @@ export default {
     },
 
     async analysis_sentence() {
-      const resolver_api = "/api/parse_text_to_entities";
+      let address =  api_gateway + "/api/parse_text_to_entities/"
+      axios({
+        method: "post",
+        url: address,
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
+        //make sure to serialize your JSON body
+        body: JSON.stringify({
+          input_str: this.query_str
+        })
+      }).then( (response) => {
+        return response.json()
+      }).then((json)=>{
+        console.log("Response:")
+        console.log(json.data)
+      })
+    },
+
+    async send_query() {
+      this.output_str = "Generating ...";
+      const resolver_api = "/api/text_to_model";
       const url = api_gateway + resolver_api;
-      this.output_str = url;
-      await axios.post(url, {input_str: this.query_str}).then((res) => {
-        this.output_str = "Generated the model for \"" + res.data.query + "\"";
-        console.log(res.data);
+      await axios.post(url, {query: this.query_str}).then((res) => {
+        console.log(res.data.geometry);
+        this.output_str = "Generated the model for \"" + res.data.query + "\"" + res.data.geometry
       });
     },
-    //
-    // async send_query() {
-    //   this.output_str = "Generating ...";
-    //   const resolver_api = "/api/text_to_model";
-    //   const url = api_gateway + resolver_api;
-    //   let vm = this;
-    //   // let generated_geometry = null;
-    //   await axios.post(url, {query: vm.query_str}).then((res) => {
-    //     // vm.output_str = JSON.stringify(res.data)
-    //     vm.output_str = "Generated the model for \"" + res.data.query + "\""
-    //     // this.ADD_OBJECT_PC("test_model_name", JSON.parse(res.data.geometry))
-    //   });
-    // },
-    //
+
     // async story_to_scene() {
     //   this.output_str = "Generating Story to Scene";
     //   const resolver_api = "/api/story_to_scene";
