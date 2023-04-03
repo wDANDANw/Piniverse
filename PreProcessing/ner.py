@@ -253,3 +253,13 @@ def parse_entities(raw_text, nlp, predictor):
 # and pass them into the parsing function themselves (but still allow this through the old parse_entities function)
 def parse_entities_standalone(text):
   return parse_entities(text, nlp, predictor)
+
+
+# Convert all tokens in the list of entities to strings
+def convert_to_strings(entities):
+  for entity in entities:
+    entity["nouns"] = map(lambda noun: noun.text, entity["nouns"])
+    entity["adjectives"] = map(lambda adj: adj.text, entity["adjectives"])
+    for relation in entity["relations"]:
+      relation["prep"] = relation["prep"].text
+      relation["entity"] = relation["entity"].text
