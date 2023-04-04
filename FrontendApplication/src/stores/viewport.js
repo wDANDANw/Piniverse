@@ -45,7 +45,7 @@ const DEBUG = true
 
 // Entity Related
 import { Entity, useEntityStore } from "@/stores/entity";
-import {getState} from "core-js/modules/web.url-search-params.constructor";
+//import {getState} from "core-js/modules/web.url-search-params.constructor";
 import scene from "three/addons/offscreen/scene";
 
 
@@ -623,13 +623,22 @@ export const useViewportStore = defineStore("scene", {
             scene.modelLines.push(new THREE.Vector3(x, y, z));
         },
         SHOW_LINES(){
-            for (let i = 0; i < scene.modelLines.length; i++) {
-                const geometry = new THREE.BufferGeometry().setFromPoints(scene.modelLines[i]);
-                const material = new THREE.LineBasicMaterial({color: 0xff0000});
-                const line = new THREE.Line(geometry, material);
-                scene.add(line);
-            }
-            this.RENDER();
+            // for (let i = 0; i < scene.modelLines.length; i++) {
+            //     const geometry = new THREE.BufferGeometry().setFromPoints(scene.modelLines[i]);
+            //     const material = new THREE.LineBasicMaterial({color: 0xff0000});
+            //     const line = new THREE.Line(geometry, material);
+            //     scene.add(line);
+            // }
+            // this.RENDER();
+            const axisLine1Material = new LineBasicMaterial({ color: 0x0000ff });
+            const axisLine1Points = [];
+            axisLine1Points.push(new Vector3(0, 0, 0));
+            axisLine1Points.push(new Vector3(3, 3, 3));
+            let axisLine1Geometry = new BufferGeometry().setFromPoints(
+                axisLine1Points
+            );
+            let axisLine1 = new Line(axisLine1Geometry, axisLine1Material);
+            this.axisLines.push(markRaw(axisLine1));
         }
 
 

@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted } from "vue";
+import {ref, onMounted} from "vue";
 import { useViewportStore } from "@/stores/viewport";
 let height = 0;
 let width = 0;
@@ -10,6 +10,8 @@ onMounted(() => {
   // height = viewport.value.offsetHeight;
   height = 500; // TODO: Placeholder
   width = viewport.value.offsetWidth;
+
+store.SHOW_LINES();
   INIT(width, height, viewport.value).then(() => {
     ANIMATE();
     window.addEventListener(
