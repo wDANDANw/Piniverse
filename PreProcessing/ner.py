@@ -258,8 +258,8 @@ def parse_entities_standalone(text):
 # Convert all tokens in the list of entities to strings
 def convert_to_strings(entities):
   for entity in entities:
-    entity["nouns"] = map(lambda noun: noun.text, entity["nouns"])
-    entity["adjectives"] = map(lambda adj: adj.text, entity["adjectives"])
+    entity["nouns"] = list(map(lambda noun: noun.text, entity["nouns"]))
+    entity["adjectives"] = list(map(lambda adj: adj.text, entity["adjectives"]))
     for relation in entity["relations"]:
       relation["prep"] = relation["prep"].text
       relation["entity"] = relation["entity"].text
