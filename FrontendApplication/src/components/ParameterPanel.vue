@@ -38,15 +38,18 @@
   </v-col>
 </template>
 
+
 <script>
 import axios from "axios";
-//import { useViewportStore } from "@/stores/viewport";
-//const store = useViewportStore();
 const api_gateway = process.env.VUE_APP_API_SERVER_GATEWAY
 
 // Viewport related
 import { mapActions } from 'pinia'
 import { useEntityStore } from "@/stores/entity";
+import * as viewport from "@/stores/viewport";
+
+
+
 //import * as querystring from "querystring";
 //import { utils } from "@/utils/utils";
 
@@ -93,31 +96,24 @@ export default {
           this.send_query(noun_array[i].nouns[0])
         }
       })
-      // let address =  api_gateway + "/api/parse_text_to_entities/"
-      // axios({
-      //   method: "post",
-      //   url: address,
-      //   headers: {
-      //     'Accept': 'application/json',
-      //     'Content-Type': 'application/json'
-      //   },
-      //   //make sure to serialize your JSON body
-      //   body: JSON.stringify({
-      //     input_str: this.query_str
-      //   })
-      // }).then( (response) => {
-      //   return response.json()
-      // }).then((json)=>{
-      //   console.log("Response:")
-      //   console.log(json.data)
-      // })
     },
 
     async send_query(object) {
+
       this.output_str = "Generating ...";
       const resolver_api = "/api/text_to_model";
       const url = api_gateway + resolver_api;
       await axios.post(url, {query: object}).then((res) => {
+        console.log(res.data.geometry);
+        viewport.useViewportStore().SHOW_LINES(res.data.geometry);
+        this.output_str = "Generated the model for \"" + res.data.query + "\"" + res.data.geometry;
+      });
+    },
+    async test() {
+      this.output_str = "Generating ...";
+      const resolver_api = "/api/text_to_model";
+      const url = api_gateway + resolver_api;
+      await axios.post(url, {query: "apple"}).then((res) => {
         console.log(res.data.geometry);
         this.output_str = "Generated the model for \"" + res.data.query + "\"" + res.data.geometry
       });

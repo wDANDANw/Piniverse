@@ -11,7 +11,6 @@ onMounted(() => {
   height = 500; // TODO: Placeholder
   width = viewport.value.offsetWidth;
 
-store.SHOW_LINES();
   INIT(width, height, viewport.value).then(() => {
     ANIMATE();
     window.addEventListener(

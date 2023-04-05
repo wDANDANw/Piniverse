@@ -20,7 +20,7 @@ import {
     Vector3 ,
     WebGLRenderer ,
 } from "three";
-import * as THREE from "three";
+//import * as THREE from "three";
 
 // Point Cloud Related
 import {
@@ -46,7 +46,7 @@ const DEBUG = true
 // Entity Related
 import { Entity, useEntityStore } from "@/stores/entity";
 //import {getState} from "core-js/modules/web.url-search-params.constructor";
-import scene from "three/addons/offscreen/scene";
+//import scene from "three/addons/offscreen/scene";
 
 
 // TODO: Reorganize the order of functions
@@ -619,27 +619,25 @@ export const useViewportStore = defineStore("scene", {
             // Return Point Cloud Object
             return new Points(object_geometry, material);
         },
-        PUSH_POINTS(x, y, z){
-            scene.modelLines.push(new THREE.Vector3(x, y, z));
+        SHOW_LINES(points){
+            const modelMaterial = new LineBasicMaterial({ color: 0x0000ff });
+            const modelPoints = [];
+            for (let i = 0; i < points.length; i++) {
+               modelPoints.push(new Vector3(points[i][0], points[i][1], points[i][2]));
+            }
+            let modelGeometry = new BufferGeometry().setFromPoints(modelPoints);
+            let model1 = new Line(modelGeometry, modelMaterial);
+            this.modelLines.push(markRaw(model1));
+            this.SHOW_MODEL();
         },
-        SHOW_LINES(){
-            // for (let i = 0; i < scene.modelLines.length; i++) {
-            //     const geometry = new THREE.BufferGeometry().setFromPoints(scene.modelLines[i]);
-            //     const material = new THREE.LineBasicMaterial({color: 0xff0000});
-            //     const line = new THREE.Line(geometry, material);
-            //     scene.add(line);
-            // }
-            // this.RENDER();
-            const axisLine1Material = new LineBasicMaterial({ color: 0x0000ff });
-            const axisLine1Points = [];
-            axisLine1Points.push(new Vector3(0, 0, 0));
-            axisLine1Points.push(new Vector3(3, 3, 3));
-            let axisLine1Geometry = new BufferGeometry().setFromPoints(
-                axisLine1Points
-            );
-            let axisLine1 = new Line(axisLine1Geometry, axisLine1Material);
-            this.axisLines.push(markRaw(axisLine1));
-        }
+        SHOW_MODEL() {
+            this.scene.add(...this.modelLines);
+            this.RENDER();
+        },
+        DELETE_MODEL() {
+            this.scene.remove(...this.modelLines);
+            this.RENDER();
+        },
 
 
     },
