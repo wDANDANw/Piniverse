@@ -104,8 +104,8 @@ export default {
       const resolver_api = "/api/text_to_model";
       const url = api_gateway + resolver_api;
       await axios.post(url, {query: object}).then((res) => {
-        //console.log(res.data);
-        viewport.useViewportStore().SHOW_LINES(res.data.geometry);
+        console.log((JSON.parse(res.data.geometry)).coords);
+        viewport.useViewportStore().SHOW_LINES((JSON.parse(res.data.geometry)).coords);
         this.output_str = "Generated the model for \"" + res.data.query + "\"" + res.data.geometry;
       });
     },
