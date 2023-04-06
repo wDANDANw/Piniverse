@@ -624,6 +624,7 @@ export const useViewportStore = defineStore("scene", {
             const modelPoints = [];
             for (let i = 0; i < points.length; i++) {
                modelPoints.push(new Vector3(points[i][0], points[i][1], points[i][2]));
+               console.log(points[i])
             }
             let modelGeometry = new BufferGeometry().setFromPoints(modelPoints);
             let model1 = new Line(modelGeometry, modelMaterial);
