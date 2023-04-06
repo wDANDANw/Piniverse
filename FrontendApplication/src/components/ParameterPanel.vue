@@ -76,7 +76,8 @@ export default {
 
     async analysis_sentence() {
       let temp_string = this.query_str;
-      fetch("http://localhost:12333/api/parse_text_to_entities/", {
+      const resolver_api = api_gateway + "/api/parse_text_to_entities/";
+      fetch(resolver_api, {
         method: "post",
         headers: {
           'Accept': 'application/json',
@@ -104,9 +105,9 @@ export default {
       const resolver_api = "/api/text_to_model";
       const url = api_gateway + resolver_api;
       await axios.post(url, {query: object}).then((res) => {
-        console.log((JSON.parse(res.data.geometry)).coords);
-        viewport.useViewportStore().SHOW_LINES((JSON.parse(res.data.geometry)).coords);
-        this.output_str = "Generated the model for \"" + res.data.query + "\"" + res.data.geometry;
+        console.log((JSON.parse(res.data.geometry)));
+        viewport.useViewportStore().SHOW_LINES((JSON.parse(res.data.geometry)).coords, (JSON.parse(res.data.geometry)).colors);
+        this.output_str = "Generated the model for \"" + res.data.query + "\"";
       });
     },
     async test() {
