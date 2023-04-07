@@ -151,9 +151,66 @@ def fill_out_locations(entities):
         boundary = add_neighbors(boundary, cur_ent)
 '''
 
-def get_rel_pos(parent, entity, prep):
-    print(parent["position"])
-    return parent["position"]  # TODO
+def get_rel_pos(parent, child, prep):
+    #print("Parent: "+parent["nouns"][0].text+" ("+str(parent["position"])+")")
+    si = prep.text.lower()  # spatial indicator
+    #print("SI: "+si)
+
+    parent["size"] = [1,1,1]  # TODO: Ensure all elements, not just parents and children, get sizes
+    child["size"] = [1,1,1]
+    px = parent["position"][0]
+    py = parent["position"][1]
+    pz = parent["position"][2]
+    child_pos = [0,0,0]
+
+    if si == 'on' or si == 'atop':
+        dy = child["size"][1] / 2 + parent["size"][1] / 2
+        child_pos = [px, py + dy, pz]
+
+    elif si == 'above' or si == 'over':
+        dy = child["size"][1] / 2 + parent["size"][1] / 2 + 2
+        child_pos = [px, py + dy, pz]
+
+    elif si == 'behind':
+        dz = -1 * (child["size"][2] / 2 + parent["size"][2] / 2)
+        child_pos = [px, py, pz + dz]
+
+    elif si == 'beside' or si == 'next to':
+        dx = 0
+        # add randomness to pick right or left side
+        side = random.randint(0,1)
+        # left
+        if side == 0:
+            dx = -1 * (child["size"][0] / 2 + parent["size"][0] / 2)
+        # right
+        else:
+            dx = child["size"][0] / 2 + parent["size"][0] / 2
+        child_pos = [px + dx, py, pz]
+
+    elif si == 'below' or si == 'under' or si == 'beneath' or si == 'underneath':
+        dy = -1 * (child["size"][1] / 2 + parent["size"][1] / 2 + 2)
+        child_pos = [px, py + dy, pz]
+
+    elif si == 'in front of':
+        dz = child["size"][2] / 2 + parent["size"][2] / 2
+        child_pos = [px, py, pz + dz]
+
+    # Default: Place it next to the parent (either side)
+    else:
+        dx = 0
+        # add randomness to pick right or left side
+        side = random.randint(0,1)
+        # left
+        if side == 0:
+            dx = -1 * (child["size"][0] / 2 + parent["size"][0] / 2)
+        # right
+        else:
+            dx = child["size"][0] / 2 + parent["size"][0] / 2
+        child_pos = [px + dx, py, pz]
+
+    #print("Child: "+child["nouns"][0].text+" ("+str(child_pos)+")")
+    return child_pos
+
 
 def get_entity(noun, entities):
     for entity in entities:
@@ -163,12 +220,21 @@ def get_entity(noun, entities):
     return False
 
 def fill_out_child_locations(entity, entities):
-    for rel in entity["relations"]:
+    for rel in entity["relations"]:  # If this entity has the relation
         prep = rel["prep"]
         target = get_entity(rel["entity"], entities)
         if("position" not in target.keys()):
-            target["position"] = get_rel_pos(entity, target, prep)
+            target["position"] = list(map(lambda x: -x, get_rel_pos(entity, target, prep)))  # Invert relationship, since parent and child are swapped in this case
             fill_out_child_locations(target, entities)
+    for potential_parent in entities:  # If the other entity has the relation
+        for rel in potential_parent["relations"]:
+            if get_entity(rel["entity"], entities) is entity:  # Relation is to the current object
+                prep = rel["prep"]
+                if("position" not in potential_parent.keys()):
+                    potential_parent["position"] = get_rel_pos(entity, potential_parent, prep)
+                    fill_out_child_locations(potential_parent, entities)
+
+
 
 def get_first_unpositioned_entity_index(entities):
     for idx, entity in enumerate(entities):
