@@ -63,6 +63,8 @@ export default {
     return{
       query_str: "",
       output_str: "",
+      positionList: [],
+      currentPosition: 0,
     }
   },
   methods:{
@@ -72,6 +74,9 @@ export default {
     clearFields(){
       this.query_str = "";
       this.output_str = "";
+      this.positionList = [];
+      this.currentPosition = 0;
+      viewport.useViewportStore().DELETE_MODEL();
     },
 
     async analysis_sentence() {
@@ -90,11 +95,11 @@ export default {
       }).then( (response) => {
         return response.json()
       }).then((json)=>{
-        console.log("Response:")
-        console.log(json)
         let noun_array = json.output;
+        this.currentPosition = 0;
         for (let i = 0; i < noun_array.length; i++) {
-          this.send_query(noun_array[i].nouns[0])
+          this.positionList.push(noun_array[i].position);
+          this.send_query(noun_array[i].adjectives[0] + " " + noun_array[i].nouns[0])
         }
       })
     },
@@ -105,9 +110,15 @@ export default {
       const resolver_api = "/api/text_to_model";
       const url = api_gateway + resolver_api;
       await axios.post(url, {query: object}).then((res) => {
-        console.log((JSON.parse(res.data.geometry)));
-        viewport.useViewportStore().SHOW_LINES((JSON.parse(res.data.geometry)).coords, (JSON.parse(res.data.geometry)).colors);
-        this.output_str = "Generated the model for \"" + res.data.query + "\"";
+        let passPosition = (JSON.parse(res.data.geometry)).coords;
+        for (let i = 0; i < passPosition.length; i++) {
+          passPosition[i][0] += this.positionList[this.currentPosition][0];
+          passPosition[i][1] += this.positionList[this.currentPosition][1];
+          passPosition[i][2] += this.positionList[this.currentPosition][2];
+        }
+        this.currentPosition += 1;
+        viewport.useViewportStore().SHOW_LINES(passPosition, (JSON.parse(res.data.geometry)).colors);
+        this.output_str = "Generated the model";
       });
     },
     async test() {

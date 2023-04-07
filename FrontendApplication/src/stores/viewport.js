@@ -108,7 +108,7 @@ export const useViewportStore = defineStore("scene", {
         INITIALIZE_CAMERA() {
             const camera = new PerspectiveCamera(
                 // 1. Field of View (degrees)
-                60,
+                90,
                 // 2. Aspect ratio
                 this.width / this.height,
                 // 3. Near clipping plane
@@ -116,7 +116,7 @@ export const useViewportStore = defineStore("scene", {
                 // 4. Far clipping plane
                 3000
             );
-            camera.position.z = 500;
+            camera.position.z = 3;
 
             this.camera = camera;
         },
@@ -494,7 +494,7 @@ export const useViewportStore = defineStore("scene", {
                 this.INITIALIZE_CAMERA();
                 this.INITIALIZE_CONTROLS();
                 this.INITIALIZE_SCENE();
-                this.INITIALIZE_DEBUG_SCENE();
+                //this.INITIALIZE_DEBUG_SCENE();
 
                 // Initial scene rendering
                 this.RENDER();
@@ -640,6 +640,7 @@ export const useViewportStore = defineStore("scene", {
         DELETE_MODEL() {
             this.scene.remove(...this.modelLines);
             this.RENDER();
+            this.modelLines = [];
         },
 
 

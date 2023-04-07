@@ -15,17 +15,20 @@
 <!--        Right side of the page-->
         <v-col style="background: #E6E6FA" class="rounded-xl ml-2">
           <v-toolbar-title style="font-size: 20px; font-family: 'Comic Sans MS',serif">3D Viewer</v-toolbar-title>
-          <v-file-input
-              label="Manual Upload Model Files"
-              type="file"
-              id="file"
-              ref="myFiles"
-              class="custom-file-input mt-4 mr-4"
-              accept=".obj"
-              @change="previewFiles"
-              multiple="true"
-              style="font-family: 'Comic Sans MS', serif"
-          ></v-file-input>
+          <v-toolbar-title style="font-size: 20px; font-family: 'Comic Sans MS',serif">W control translate switch</v-toolbar-title>
+          <v-toolbar-title style="font-size: 20px; font-family: 'Comic Sans MS',serif">E control rotate switch</v-toolbar-title>
+          <v-toolbar-title style="font-size: 20px; font-family: 'Comic Sans MS',serif">R control scale switch</v-toolbar-title>
+<!--          <v-file-input-->
+<!--              label="Manual Upload Model Files"-->
+<!--              type="file"-->
+<!--              id="file"-->
+<!--              ref="myFiles"-->
+<!--              class="custom-file-input mt-4 mr-4"-->
+<!--              accept=".obj"-->
+<!--              @change="previewFiles"-->
+<!--              multiple="true"-->
+<!--              style="font-family: 'Comic Sans MS', serif"-->
+<!--          ></v-file-input>-->
           <viewport class="view">
 
           </viewport>
