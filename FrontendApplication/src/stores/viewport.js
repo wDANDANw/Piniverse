@@ -5,22 +5,22 @@ import { DragControls } from "@/stores/custom_modules/DragControls";
 import { TransformControls } from "@/stores/custom_modules/TransformControls";
 import { FlyControls } from "@/stores/custom_modules/FlyControls";
 import {
-    AmbientLight ,
-    BufferGeometry ,
-    Color ,
+    AmbientLight,
+    BufferGeometry,
+    Color,
     // CylinderGeometry,
-    DirectionalLight ,
+    DirectionalLight,
     // FogExp2 ,
-    Line ,
+    Line,
     LineBasicMaterial,
     // Mesh,
     // MeshPhongMaterial,
-    PerspectiveCamera ,
-    Scene ,
-    Vector3 ,
-    WebGLRenderer ,
+    PerspectiveCamera,
+    Scene,
+    Vector3,
+    WebGLRenderer,
 } from "three";
-import * as THREE from "three";
+//import * as THREE from "three";
 
 // Point Cloud Related
 import {
@@ -45,8 +45,8 @@ const DEBUG = true
 
 // Entity Related
 import { Entity, useEntityStore } from "@/stores/entity";
-import {getState} from "core-js/modules/web.url-search-params.constructor";
-import scene from "three/addons/offscreen/scene";
+//import {getState} from "core-js/modules/web.url-search-params.constructor";
+//import scene from "three/addons/offscreen/scene";
 
 
 // TODO: Reorganize the order of functions
@@ -370,6 +370,7 @@ export const useViewportStore = defineStore("scene", {
             // lights
             var lightA = new DirectionalLight(0xffffff);
             lightA.position.set(1, 1, 1);
+            //Set up shadow properties for the light
             scene.add(markRaw(lightA));
             var lightB = new DirectionalLight(0x002288);
             lightB.position.set(-1, -1, -1);
@@ -557,7 +558,7 @@ export const useViewportStore = defineStore("scene", {
             // TODO
             console.log(entity)
         },
-        CREATE_PC_OBJECT(name, geometry) {
+        CREATE_PC_OBJECT(name, coords, colorList) {
             /***
              *  Creates a point three js cloud object and return it
              *  name: name of the model
@@ -574,7 +575,7 @@ export const useViewportStore = defineStore("scene", {
 
             // Calculate centroid
             let center_x, center_y, center_z = 0
-            let num_of_points = geometry.coords.length
+            let num_of_points = coords.length
 
             // Point Cloud Construction
             // Coords
@@ -585,8 +586,8 @@ export const useViewportStore = defineStore("scene", {
             let centroid = [0, 0, 0]
 
             let vertex, vx, vy, vz, color;
-            for (let i = 0; i < geometry.coords.length; i ++ ) {
-                vertex = geometry.coords[i]
+            for (let i = 0; i < coords.length; i ++ ) {
+                vertex = coords[i]
                 vx = vertex[0] * PC_CORRECTION - PC_CORRECTION/2
                 vy = vertex[1] * PC_CORRECTION - PC_CORRECTION/2
                 vz = vertex[2] * PC_CORRECTION - PC_CORRECTION/2
@@ -597,7 +598,7 @@ export const useViewportStore = defineStore("scene", {
 
                 positions.push(vx, vy, vz)
 
-                color = geometry.colors[i]
+                color = colorList[i]
                 colors.push(color[0], color[1], color[2])
             }
 
@@ -619,18 +620,27 @@ export const useViewportStore = defineStore("scene", {
             // Return Point Cloud Object
             return new Points(object_geometry, material);
         },
-        PUSH_POINTS(x, y, z){
-            scene.modelLines.push(new THREE.Vector3(x, y, z));
+        SHOW_LINES(coords, colorList) {
+            // //let colorList = colors.map(([r, g, b]) => ["#", (parseInt(r)*255).toString(16), (parseInt(g)*255).toString(16), (parseInt(b)*255).toString(16)].join(""))
+            // const modelPoints = [];
+            // const modelMaterial = new LineBasicMaterial({ color: 0xff0000 });
+            // for (let i = 0; i < points.length; i++) {
+            //     modelPoints.push(new Vector3(points[i][0], points[i][1], points[i][2]));
+            // }
+            // let modelGeometry = new BufferGeometry().setFromPoints(modelPoints);
+            //let model1 = new LineLoop(modelGeometry, modelMaterial);
+            let model1 = this.CREATE_PC_OBJECT("model", coords, colorList);
+            this.modelLines.push(markRaw(model1));
+            this.SHOW_MODEL();
         },
-        SHOW_LINES(){
-            for (let i = 0; i < scene.modelLines.length; i++) {
-                const geometry = new THREE.BufferGeometry().setFromPoints(scene.modelLines[i]);
-                const material = new THREE.LineBasicMaterial({color: 0xff0000});
-                const line = new THREE.Line(geometry, material);
-                scene.add(line);
-            }
+        SHOW_MODEL() {
+            this.scene.add(...this.modelLines);
             this.RENDER();
-        }
+        },
+        DELETE_MODEL() {
+            this.scene.remove(...this.modelLines);
+            this.RENDER();
+        },
 
 
     },

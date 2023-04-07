@@ -88,8 +88,8 @@ import ParameterPanel from "@/components/ParameterPanel";
 
    name: 'App',
    components: {
-     ParameterPanel,
      viewport: viewPort,
+     ParameterPanel,
      panel: controlPanel,
    },
    data() {

@@ -13,7 +13,7 @@
         outlined
         rounded
         class="mt-5"
-        @click="send_query"
+        @click="analysis_sentence"
         style="font-family: 'Comic Sans MS', serif"
     >Generate
     </v-btn>
@@ -38,6 +38,7 @@
   </v-col>
 </template>
 
+
 <script>
 import axios from "axios";
 const api_gateway = process.env.VUE_APP_API_SERVER_GATEWAY
@@ -45,6 +46,10 @@ const api_gateway = process.env.VUE_APP_API_SERVER_GATEWAY
 // Viewport related
 import { mapActions } from 'pinia'
 import { useEntityStore } from "@/stores/entity";
+import * as viewport from "@/stores/viewport";
+
+
+
 //import * as querystring from "querystring";
 //import { utils } from "@/utils/utils";
 
@@ -70,31 +75,46 @@ export default {
     },
 
     async analysis_sentence() {
-      let address =  api_gateway + "/api/parse_text_to_entities/"
-      axios({
+      let temp_string = this.query_str;
+      const resolver_api = api_gateway + "/api/parse_text_to_entities/";
+      fetch(resolver_api, {
         method: "post",
-        url: address,
         headers: {
           'Accept': 'application/json',
           'Content-Type': 'application/json'
         },
         //make sure to serialize your JSON body
         body: JSON.stringify({
-          input_str: this.query_str
+          input_str: temp_string
         })
       }).then( (response) => {
         return response.json()
       }).then((json)=>{
         console.log("Response:")
-        console.log(json.data)
+        console.log(json)
+        let noun_array = json.output;
+        for (let i = 0; i < noun_array.length; i++) {
+          this.send_query(noun_array[i].nouns[0])
+        }
       })
     },
 
-    async send_query() {
+    async send_query(object) {
+
       this.output_str = "Generating ...";
       const resolver_api = "/api/text_to_model";
       const url = api_gateway + resolver_api;
-      await axios.post(url, {query: this.query_str}).then((res) => {
+      await axios.post(url, {query: object}).then((res) => {
+        console.log((JSON.parse(res.data.geometry)));
+        viewport.useViewportStore().SHOW_LINES((JSON.parse(res.data.geometry)).coords, (JSON.parse(res.data.geometry)).colors);
+        this.output_str = "Generated the model for \"" + res.data.query + "\"";
+      });
+    },
+    async test() {
+      this.output_str = "Generating ...";
+      const resolver_api = "/api/text_to_model";
+      const url = api_gateway + resolver_api;
+      await axios.post(url, {query: "apple"}).then((res) => {
         console.log(res.data.geometry);
         this.output_str = "Generated the model for \"" + res.data.query + "\"" + res.data.geometry
       });

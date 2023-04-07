@@ -10,6 +10,9 @@ from flask import request, send_file
 import io
 import base64
 
+
+
+
 app = Flask(__name__)
 
 # Environment
@@ -61,6 +64,7 @@ def text_to_3d_model():
         if DEBUG_PC_INSTANCE is None:
             DEBUG_PC_INSTANCE = text_to_pc(query)
         else:
+        #    DEBUG_PC_INSTANCE = text_to_pc(query)
             print("Returning first time queried pc")
 
         pc = DEBUG_PC_INSTANCE
