@@ -99,7 +99,17 @@ export default {
         this.currentPosition = 0;
         for (let i = 0; i < noun_array.length; i++) {
           this.positionList.push(noun_array[i].position);
-          this.send_query(noun_array[i].adjectives[0] + " " + noun_array[i].nouns[0])
+          if (noun_array[i].adjectives[0] != undefined){
+            let adj = "";
+            // eslint-disable-next-line for-direction
+            for(let j = 0; j < noun_array[i].adjectives.length; j++){
+              adj = noun_array[i].adjectives[j] + " " + adj;
+            }
+            this.send_query(adj + noun_array[i].nouns[0]);
+          }
+          else{
+            this.send_query(noun_array[i].nouns[0])
+          }
         }
       })
     },
